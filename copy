@@ -1,40 +1,35 @@
-class Custom_Walker_Nav_Menu extends Walker_Nav_Menu {
+class My_Custom_Search_Widget extends WP_Widget {
+    
+    public function __construct() {
+        parent::__construct(
+            'my_custom_search_widget',
+            __('Custom Search Widget', 'text_domain'),
+            array( 'description' => __( 'A Custom Search Widget using get_search_form()', 'text_domain' ) )
+        );
+    }
 
-    // Переопределяем метод start_el
-    public function start_el(&$output, $item, $depth = 0, $args = null, $id = 0) {
-        $classes = empty($item->classes) ? array() : (array) $item->classes;
-        $class_names = join(' ', apply_filters('nav_menu_css_class', array_filter($classes), $item, $args, $depth));
-        $class_names = $class_names ? ' class="' . esc_attr($class_names) . '"' : '';
+    public function widget( $args, $instance ) {
+        echo $args['before_widget']; // Вивід коду перед віджетом (за потреби)
 
-        $id = apply_filters('nav_menu_item_id', 'menu-item-'. $item->ID, $item, $args, $depth);
-        $id = $id ? ' id="' . esc_attr($id) . '"' : '';
+        // Викликаємо кастомну форму пошуку
+        get_search_form();
 
-        $atts = array();
-        $atts['title']  = !empty($item->attr_title) ? $item->attr_title : '';
-        $atts['target'] = !empty($item->target) ? $item->target : '';
-        $atts['rel']    = !empty($item->xfn) ? $item->xfn : '';
+        echo $args['after_widget']; // Вивід коду після віджета (за потреби)
+    }
 
-        // Добавляем # перед href
-        $atts['href']   = !empty($item->url) ? '#' . ltrim($item->url, '#') : '';
+    public function form( $instance ) {
+        // Тут можна додати опції для віджета (якщо потрібно)
+    }
 
-        $atts = apply_filters('nav_menu_link_attributes', $atts, $item, $args, $depth);
-        $attributes = '';
-        foreach ($atts as $attr => $value) {
-            if (!empty($value)) {
-                $value = esc_attr($value);
-                $attributes .= ' ' . $attr . '="' . $value . '"';
-            }
-        }
-
-        $title = apply_filters('the_title', $item->title, $item->ID);
-        $title = apply_filters('nav_menu_item_title', $title, $item, $args, $depth);
-
-        $item_output = $args->before;
-        $item_output .= '<a'. $class_names . $attributes .'>';
-        $item_output .= $args->link_before . $title . $args->link_after;
-        $item_output .= '</a>';
-        $item_output .= $args->after;
-
-        $output .= apply_filters('walker_nav_menu_start_el', $item_output, $item, $depth, $args);
+    public function update( $new_instance, $old_instance ) {
+        $instance = array();
+        // Обробка збереження нових налаштувань (якщо потрібно)
+        return $instance;
     }
 }
+
+// Реєструємо кастомний віджет
+function register_my_custom_search_widget() {
+    register_widget( 'My_Custom_Search_Widget' );
+}
+add_action( 'widgets_init', 'register_my_custom_search_widget' );
