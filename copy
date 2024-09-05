@@ -1,58 +1,34 @@
-protected function _register_controls() {
+protected function render() {
+    // Отримуємо налаштування віджета
+    $settings = $this->get_settings_for_display();
 
-    // Створюємо секцію для налаштувань
-    $this->start_controls_section(
-        'section_content',
-        [
-            'label' => __( 'Content', 'plugin-name' ),
-        ]
-    );
+    if ( ! empty( $settings['repeater_items'] ) ) {
+        echo '<div class="custom-repeater-widget">';
+        
+        // Проходимо по всіх елементах репітера
+        foreach ( $settings['repeater_items'] as $item ) {
+            echo '<div class="repeater-item">';
 
-    // Додаємо репітер
-    $repeater = new \Elementor\Repeater();
+            // Якщо посилання повинно бути зверху
+            if ( 'top' === $item['link_position'] ) {
+                echo '<a href="#" class="custom-link">Посилання зверху</a>';
+            }
 
-    // Поле для зображення
-    $repeater->add_control(
-        'image',
-        [
-            'label' => __( 'Image', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::MEDIA,
-            'default' => [
-                'url' => \Elementor\Utils::get_placeholder_image_src(),
-            ],
-        ]
-    );
+            // Виводимо зображення
+            if ( ! empty( $item['image']['url'] ) ) {
+                echo '<div class="image-container">';
+                echo '<img src="' . esc_url( $item['image']['url'] ) . '" alt="Image">';
+                echo '</div>';
+            }
 
-    // Селектор для вибору позиції посилання
-    $repeater->add_control(
-        'link_position',
-        [
-            'label' => __( 'Link Position', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::SELECT,
-            'default' => 'bottom',
-            'options' => [
-                'top' => __( 'Top', 'plugin-name' ),
-                'bottom' => __( 'Bottom', 'plugin-name' ),
-            ],
-        ]
-    );
+            // Якщо посилання повинно бути знизу
+            if ( 'bottom' === $item['link_position'] ) {
+                echo '<a href="#" class="custom-link">Посилання знизу</a>';
+            }
 
-    // Додаємо репітер у віджет
-    $this->add_control(
-        'repeater_items',
-        [
-            'label' => __( 'Repeater Items', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::REPEATER,
-            'fields' => $repeater->get_controls(),
-            'default' => [
-                [
-                    'link_position' => 'bottom',
-                ],
-            ],
-            'title_field' => '{{{ link_position }}}',
-        ]
-    );
+            echo '</div>'; // repeater-item
+        }
 
-    // Закриваємо секцію
-    $this->end_controls_section();
+        echo '</div>'; // custom-repeater-widget
+    }
 }
