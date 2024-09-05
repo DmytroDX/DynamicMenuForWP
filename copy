@@ -1,10 +1,77 @@
-add_filter('elementor/widget/render_content', function($content, $widget) {
-    if ($widget->get_name() === 'heading') {
-        $settings = $widget->get_settings_for_display();
-        $custom_class = $settings['custom_heading_style'] === 'textured' ? 'heading-textured' : 'heading-default';
-
-        // Додати кастомний клас до заголовка
-        $content = str_replace('class="elementor-heading-title"', 'class="elementor-heading-title ' . $custom_class . '"', $content);
+class Custom_Repeater_Widget extends WP_Widget {
+    
+    public function __construct() {
+        parent::__construct(
+            'custom_repeater_widget', 
+            __('Custom Repeater Widget', 'text_domain'),
+            array( 'description' => __( 'A custom widget with a repeater field', 'text_domain' ))
+        );
     }
-    return $content;
-}, 10, 2);
+
+    public function widget($args, $instance) {
+        // Виведення віджета на фронт-енді
+        echo $args['before_widget'];
+        if (!empty($instance['title'])) {
+            echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
+        }
+
+        // Отримання даних з репітера
+        if (!empty($instance['repeater'])) {
+            foreach ($instance['repeater'] as $item) {
+                // Виведення зображення
+                if (!empty($item['image'])) {
+                    echo '<img src="' . esc_url($item['image']) . '" alt="">';
+                }
+
+                // Виведення посилання в залежності від вибору
+                if ($item['link_position'] == 'top') {
+                    echo '<a href="#">Посилання зверху</a>';
+                }
+
+                // Виведення додаткового контенту або зображення
+                echo '<div>Тут може бути ще контент або зображення</div>';
+
+                if ($item['link_position'] == 'bottom') {
+                    echo '<a href="#">Посилання знизу</a>';
+                }
+            }
+        }
+
+        echo $args['after_widget'];
+    }
+
+    public function form($instance) {
+        // Поле для введення заголовка
+        $title = !empty($instance['title']) ? $instance['title'] : '';
+        ?>
+        <p>
+            <label for="<?php echo esc_attr($this->get_field_id('title')); ?>"><?php _e('Title:'); ?></label> 
+            <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($title); ?>">
+        </p>
+
+        <!-- Додати репітер -->
+        <p>
+            <button class="add-repeater-item">Додати елемент</button>
+            <ul class="repeater-list">
+                <!-- Додати динамічні елементи репітера -->
+            </ul>
+        </p>
+        <?php
+    }
+
+    public function update($new_instance, $old_instance) {
+        $instance = array();
+        $instance['title'] = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
+        
+        // Зберігаємо дані репітера
+        $instance['repeater'] = !empty($new_instance['repeater']) ? $new_instance['repeater'] : array();
+
+        return $instance;
+    }
+}
+
+// Реєстрація віджета
+function register_custom_repeater_widget() {
+    register_widget('Custom_Repeater_Widget');
+}
+add_action('widgets_init', 'register_custom_repeater_widget');
