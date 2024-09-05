@@ -1,34 +1,95 @@
-protected function render() {
-    // Отримуємо налаштування віджета
-    $settings = $this->get_settings_for_display();
+protected function _register_controls() {
 
-    if ( ! empty( $settings['repeater_items'] ) ) {
-        echo '<div class="custom-repeater-widget">';
-        
-        // Проходимо по всіх елементах репітера
-        foreach ( $settings['repeater_items'] as $item ) {
-            echo '<div class="repeater-item">';
+    // Створюємо секцію для налаштувань
+    $this->start_controls_section(
+        'section_content',
+        [
+            'label' => __( 'Content', 'plugin-name' ),
+        ]
+    );
 
-            // Якщо посилання повинно бути зверху
-            if ( 'top' === $item['link_position'] ) {
-                echo '<a href="#" class="custom-link">Посилання зверху</a>';
-            }
+    // Додаємо репітер
+    $repeater = new \Elementor\Repeater();
 
-            // Виводимо зображення
-            if ( ! empty( $item['image']['url'] ) ) {
-                echo '<div class="image-container">';
-                echo '<img src="' . esc_url( $item['image']['url'] ) . '" alt="Image">';
-                echo '</div>';
-            }
+    // Поле для зображення
+    $repeater->add_control(
+        'image',
+        [
+            'label' => __( 'Image', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::MEDIA,
+            'default' => [
+                'url' => \Elementor\Utils::get_placeholder_image_src(),
+            ],
+        ]
+    );
 
-            // Якщо посилання повинно бути знизу
-            if ( 'bottom' === $item['link_position'] ) {
-                echo '<a href="#" class="custom-link">Посилання знизу</a>';
-            }
+    // Поле для висоти зображення
+    $repeater->add_control(
+        'image_height',
+        [
+            'label' => __( 'Image Height', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::TEXT,
+            'default' => '300px',
+            'description' => __( 'Set the height of the image (e.g., 300px, 100%, auto)', 'plugin-name' ),
+        ]
+    );
 
-            echo '</div>'; // repeater-item
-        }
+    // Селектор для вибору позиції посилання
+    $repeater->add_control(
+        'link_position',
+        [
+            'label' => __( 'Link Position', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'default' => 'bottom',
+            'options' => [
+                'top' => __( 'Top', 'plugin-name' ),
+                'bottom' => __( 'Bottom', 'plugin-name' ),
+            ],
+        ]
+    );
 
-        echo '</div>'; // custom-repeater-widget
-    }
+    // Поле для URL посилання
+    $repeater->add_control(
+        'url',
+        [
+            'label' => __( 'URL', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::URL,
+            'placeholder' => __( 'https://your-link.com', 'plugin-name' ),
+            'default' => [
+                'url' => '',
+            ],
+        ]
+    );
+
+    // Поле для тексту посилання
+    $repeater->add_control(
+        'link_text',
+        [
+            'label' => __( 'Link Text', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::TEXT,
+            'default' => __( 'Click here', 'plugin-name' ),
+            'placeholder' => __( 'Enter your text', 'plugin-name' ),
+        ]
+    );
+
+    // Додаємо репітер у віджет
+    $this->add_control(
+        'repeater_items',
+        [
+            'label' => __( 'Repeater Items', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::REPEATER,
+            'fields' => $repeater->get_controls(),
+            'default' => [
+                [
+                    'link_position' => 'bottom',
+                    'link_text' => __( 'Click here', 'plugin-name' ),
+                    'image_height' => '300px',
+                ],
+            ],
+            'title_field' => '{{{ link_text }}}',
+        ]
+    );
+
+    // Закриваємо секцію
+    $this->end_controls_section();
 }
