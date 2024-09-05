@@ -1,4 +1,14 @@
 add_action('elementor/element/heading/section_title_style/after_section_end', function($element, $args) {
+    // Додаємо нову секцію
+    $element->start_controls_section(
+        'custom_heading_section',
+        [
+            'label' => __('Custom Heading Options', 'text-domain'),
+            'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+        ]
+    );
+
+    // Додаємо кастомний контроль до нової секції
     $element->add_control(
         'custom_heading_style',
         [
@@ -12,4 +22,7 @@ add_action('elementor/element/heading/section_title_style/after_section_end', fu
             'description' => __('Select the style for the heading.', 'text-domain'),
         ]
     );
+
+    // Завершуємо секцію
+    $element->end_controls_section();
 }, 10, 2);
