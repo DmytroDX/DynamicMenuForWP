@@ -1,28 +1,10 @@
-add_action('elementor/element/heading/section_title_style/after_section_end', function($element, $args) {
-    // Додаємо нову секцію
-    $element->start_controls_section(
-        'custom_heading_section',
-        [
-            'label' => __('Custom Heading Options', 'text-domain'),
-            'tab' => \Elementor\Controls_Manager::TAB_STYLE,
-        ]
-    );
+add_filter('elementor/widget/render_content', function($content, $widget) {
+    if ($widget->get_name() === 'heading') {
+        $settings = $widget->get_settings_for_display();
+        $custom_class = $settings['custom_heading_style'] === 'textured' ? 'heading-textured' : 'heading-default';
 
-    // Додаємо кастомний контроль до нової секції
-    $element->add_control(
-        'custom_heading_style',
-        [
-            'label' => __('Custom Heading Style', 'text-domain'),
-            'type' => \Elementor\Controls_Manager::SELECT,
-            'options' => [
-                'default' => __('Default', 'text-domain'),
-                'textured' => __('Textured', 'text-domain'),
-            ],
-            'default' => 'default',
-            'description' => __('Select the style for the heading.', 'text-domain'),
-        ]
-    );
-
-    // Завершуємо секцію
-    $element->end_controls_section();
+        // Додати кастомний клас до заголовка
+        $content = str_replace('class="elementor-heading-title"', 'class="elementor-heading-title ' . $custom_class . '"', $content);
+    }
+    return $content;
 }, 10, 2);
