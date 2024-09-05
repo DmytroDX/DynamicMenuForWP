@@ -1,77 +1,58 @@
-class Custom_Repeater_Widget extends WP_Widget {
-    
-    public function __construct() {
-        parent::__construct(
-            'custom_repeater_widget', 
-            __('Custom Repeater Widget', 'text_domain'),
-            array( 'description' => __( 'A custom widget with a repeater field', 'text_domain' ))
-        );
-    }
+protected function _register_controls() {
 
-    public function widget($args, $instance) {
-        // Виведення віджета на фронт-енді
-        echo $args['before_widget'];
-        if (!empty($instance['title'])) {
-            echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
-        }
+    // Створюємо секцію для налаштувань
+    $this->start_controls_section(
+        'section_content',
+        [
+            'label' => __( 'Content', 'plugin-name' ),
+        ]
+    );
 
-        // Отримання даних з репітера
-        if (!empty($instance['repeater'])) {
-            foreach ($instance['repeater'] as $item) {
-                // Виведення зображення
-                if (!empty($item['image'])) {
-                    echo '<img src="' . esc_url($item['image']) . '" alt="">';
-                }
+    // Додаємо репітер
+    $repeater = new \Elementor\Repeater();
 
-                // Виведення посилання в залежності від вибору
-                if ($item['link_position'] == 'top') {
-                    echo '<a href="#">Посилання зверху</a>';
-                }
+    // Поле для зображення
+    $repeater->add_control(
+        'image',
+        [
+            'label' => __( 'Image', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::MEDIA,
+            'default' => [
+                'url' => \Elementor\Utils::get_placeholder_image_src(),
+            ],
+        ]
+    );
 
-                // Виведення додаткового контенту або зображення
-                echo '<div>Тут може бути ще контент або зображення</div>';
+    // Селектор для вибору позиції посилання
+    $repeater->add_control(
+        'link_position',
+        [
+            'label' => __( 'Link Position', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'default' => 'bottom',
+            'options' => [
+                'top' => __( 'Top', 'plugin-name' ),
+                'bottom' => __( 'Bottom', 'plugin-name' ),
+            ],
+        ]
+    );
 
-                if ($item['link_position'] == 'bottom') {
-                    echo '<a href="#">Посилання знизу</a>';
-                }
-            }
-        }
+    // Додаємо репітер у віджет
+    $this->add_control(
+        'repeater_items',
+        [
+            'label' => __( 'Repeater Items', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::REPEATER,
+            'fields' => $repeater->get_controls(),
+            'default' => [
+                [
+                    'link_position' => 'bottom',
+                ],
+            ],
+            'title_field' => '{{{ link_position }}}',
+        ]
+    );
 
-        echo $args['after_widget'];
-    }
-
-    public function form($instance) {
-        // Поле для введення заголовка
-        $title = !empty($instance['title']) ? $instance['title'] : '';
-        ?>
-        <p>
-            <label for="<?php echo esc_attr($this->get_field_id('title')); ?>"><?php _e('Title:'); ?></label> 
-            <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($title); ?>">
-        </p>
-
-        <!-- Додати репітер -->
-        <p>
-            <button class="add-repeater-item">Додати елемент</button>
-            <ul class="repeater-list">
-                <!-- Додати динамічні елементи репітера -->
-            </ul>
-        </p>
-        <?php
-    }
-
-    public function update($new_instance, $old_instance) {
-        $instance = array();
-        $instance['title'] = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
-        
-        // Зберігаємо дані репітера
-        $instance['repeater'] = !empty($new_instance['repeater']) ? $new_instance['repeater'] : array();
-
-        return $instance;
-    }
+    // Закриваємо секцію
+    $this->end_controls_section();
 }
-
-// Реєстрація віджета
-function register_custom_repeater_widget() {
-    register_widget('Custom_Repeater_Widget');
-}
-add_action('widgets_init', 'register_custom_repeater_widget');
