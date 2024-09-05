@@ -1,34 +1,15 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const sections = document.querySelectorAll("section");
-    const navLi = document.querySelectorAll("#navbar ul li a");
-
-    const observer = new IntersectionObserver(entries => {
-        let hasActiveSection = false;
-
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const activeSectionId = entry.target.id;
-
-                navLi.forEach(link => {
-                    link.classList.remove("active");
-
-                    if (link.getAttribute("href").substring(1) === activeSectionId) {
-                        link.classList.add("active");
-                        hasActiveSection = true;
-                    }
-                });
-            }
-        });
-
-        // Якщо жодна секція не активна, зняти клас active з усіх пунктів меню
-        if (!hasActiveSection) {
-            navLi.forEach(link => {
-                link.classList.remove("active");
-            });
-        }
-    }, { threshold: 0.5 }); // Відслідковувати секцію, коли 50% її в полі видимості
-
-    sections.forEach(section => {
-        observer.observe(section);
-    });
-});
+add_action('elementor/element/heading/section_title_style/after_section_end', function($element, $args) {
+    $element->add_control(
+        'custom_heading_style',
+        [
+            'label' => __('Custom Heading Style', 'text-domain'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                'default' => __('Default', 'text-domain'),
+                'textured' => __('Textured', 'text-domain'),
+            ],
+            'default' => 'default',
+            'description' => __('Select the style for the heading.', 'text-domain'),
+        ]
+    );
+}, 10, 2);
