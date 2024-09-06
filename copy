@@ -1,15 +1,15 @@
-class Custom_Widget extends \Elementor\Widget_Base {
+class My_Custom_Container_Widget extends \Elementor\Widget_Base {
 
     public function get_name() {
-        return 'custom_widget';
+        return 'my_custom_container_widget';
     }
 
     public function get_title() {
-        return __( 'Custom Widget', 'text-domain' );
+        return 'My Custom Container Widget';
     }
 
     public function get_icon() {
-        return 'eicon-code';
+        return 'eicon-box';
     }
 
     public function get_categories() {
@@ -20,18 +20,19 @@ class Custom_Widget extends \Elementor\Widget_Base {
         $this->start_controls_section(
             'content_section',
             [
-                'label' => __( 'Content', 'text-domain' ),
+                'label' => __('Content', 'plugin-name'),
                 'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
             ]
         );
 
-        // Контроль для вставки віджетів
+        // Контейнер для виводу HTML
         $this->add_control(
-            'inner_widgets',
+            'container_content',
             [
-                'label' => __( 'Add Widgets', 'text-domain' ),
-                'type' => \Elementor\Controls_Manager::REPEATER,
-                'fields' => [],
+                'label' => __('Container Content', 'plugin-name'),
+                'type' => \Elementor\Controls_Manager::WYSIWYG,
+                'default' => __('Default content', 'plugin-name'),
+                'placeholder' => __('Type your content here', 'plugin-name'),
             ]
         );
 
@@ -39,13 +40,21 @@ class Custom_Widget extends \Elementor\Widget_Base {
     }
 
     protected function render() {
-        // Тут ви можете викликати інші віджети або контент за допомогою функцій Elementor
-        echo '<div class="custom-widget">';
+        $settings = $this->get_settings_for_display();
 
-        // Вставка внутрішніх віджетів
-        echo \Elementor\Plugin::$instance->frontend->get_builder_content_for_display($this->get_settings('inner_widgets'));
-
+        echo '<div class="custom-container">';
+        echo wp_kses_post($settings['container_content']);
         echo '</div>';
     }
 
+    protected function _content_template() {
+        ?>
+        <# 
+        var containerContent = settings.container_content;
+        #>
+        <div class="custom-container">
+            {{{ containerContent }}}
+        </div>
+        <?php
+    }
 }
