@@ -1,6 +1,69 @@
 protected function _register_controls() {
+    
+    // Підрозділ для налаштувань бекграунду
+    $this->start_controls_section(
+        'section_background',
+        [
+            'label' => __( 'Background', 'plugin-name' ),
+        ]
+    );
 
-    // Підрозділ для налаштування слайдів
+    // Контролер для вибору бекграунду (зображення або колір)
+    $this->add_control(
+        'background_type',
+        [
+            'label' => __( 'Background Type', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'image' => [
+                    'title' => __( 'Image', 'plugin-name' ),
+                    'icon' => 'fa fa-image',
+                ],
+                'color' => [
+                    'title' => __( 'Color', 'plugin-name' ),
+                    'icon' => 'fa fa-paint-brush',
+                ],
+            ],
+            'default' => 'image',
+            'toggle' => true,
+        ]
+    );
+
+    // Поле для завантаження зображення, коли обрано тип 'image'
+    $this->add_control(
+        'background_image',
+        [
+            'label' => __( 'Choose Background Image', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::MEDIA,
+            'default' => [
+                'url' => \Elementor\Utils::get_placeholder_image_src(),
+            ],
+            'condition' => [
+                'background_type' => 'image',
+            ],
+        ]
+    );
+
+    // Поле для вибору кольору, коли обрано тип 'color'
+    $this->add_control(
+        'background_color',
+        [
+            'label' => __( 'Choose Background Color', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::COLOR,
+            'scheme' => [
+                'type' => \Elementor\Core\Schemes\Color::get_type(),
+                'value' => \Elementor\Core\Schemes\Color::COLOR_1,
+            ],
+            'default' => '#FFFFFF',
+            'condition' => [
+                'background_type' => 'color',
+            ],
+        ]
+    );
+
+    $this->end_controls_section();
+
+    // Підрозділ для налаштувань слайдів
     $this->start_controls_section(
         'section_slides',
         [
@@ -8,10 +71,12 @@ protected function _register_controls() {
         ]
     );
 
-    // Репітер
+    // Далі тут додаємо репітер і інші налаштування, як було показано раніше...
+    
+    // Створення репітера для слайдів
     $repeater = new \Elementor\Repeater();
 
-    // Радіо кнопка для вибору між зображенням та текстом
+    // Додавання радіо кнопки для вибору між зображенням або текстовим слайдом
     $repeater->add_control(
         'slide_type',
         [
@@ -34,7 +99,7 @@ protected function _register_controls() {
 
     // Секція для зображення
     $repeater->add_control(
-        'image',
+        'image_slide',
         [
             'label' => __( 'Choose Image', 'plugin-name' ),
             'type' => \Elementor\Controls_Manager::MEDIA,
@@ -49,46 +114,59 @@ protected function _register_controls() {
 
     // Секція для тексту
     $repeater->add_control(
-        'text_content',
+        'text_slide',
         [
             'label' => __( 'Slide Text', 'plugin-name' ),
             'type' => \Elementor\Controls_Manager::TEXTAREA,
-            'default' => __( 'Enter your text here', 'plugin-name' ),
+            'default' => __( 'Your text here', 'plugin-name' ),
+            'placeholder' => __( 'Enter your text', 'plugin-name' ),
             'condition' => [
                 'slide_type' => 'text',
             ],
         ]
     );
 
-    // Поле для вибору типографії для тексту
+    // Типографія для тексту
     $repeater->add_group_control(
         \Elementor\Group_Control_Typography::get_type(),
         [
             'name' => 'text_typography',
             'label' => __( 'Typography', 'plugin-name' ),
-            'selector' => '{{WRAPPER}} .text-slide',
+            'selector' => '{{WRAPPER}} {{CURRENT_ITEM}} .slide-text',
             'condition' => [
                 'slide_type' => 'text',
             ],
         ]
     );
 
-    // Поле для введення імені автора
+    // Поле автора
     $repeater->add_control(
         'author_name',
         [
             'label' => __( 'Author Name', 'plugin-name' ),
             'type' => \Elementor\Controls_Manager::TEXT,
-            'default' => __( 'Author', 'plugin-name' ),
+            'placeholder' => __( 'Enter author name', 'plugin-name' ),
             'condition' => [
                 'slide_type' => 'text',
             ],
         ]
     );
 
-    // Додаємо репітер до контрола
+    // Додаємо репітер
     $this->add_control(
         'slides',
         [
             'label' => __( 'Slides', 'plugin-name' ),
-            'type' =>
+            'type' => \Elementor\Controls_Manager::REPEATER,
+            'fields' => $repeater->get_controls(),
+            'default' => [
+                [
+                    'slide_type' => 'image',
+                ],
+            ],
+            'title_field' => '{{{ slide_type === "image" ? "Image Slide" : "Text Slide" }}}',
+        ]
+    );
+
+    $this->end_controls_section();
+}
