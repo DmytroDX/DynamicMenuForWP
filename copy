@@ -1,95 +1,94 @@
 protected function _register_controls() {
 
-    // Створюємо секцію для налаштувань
+    // Підрозділ для налаштування слайдів
     $this->start_controls_section(
-        'section_content',
+        'section_slides',
         [
-            'label' => __( 'Content', 'plugin-name' ),
+            'label' => __( 'Slides', 'plugin-name' ),
         ]
     );
 
-    // Додаємо репітер
+    // Репітер
     $repeater = new \Elementor\Repeater();
 
-    // Поле для зображення
+    // Радіо кнопка для вибору між зображенням та текстом
+    $repeater->add_control(
+        'slide_type',
+        [
+            'label' => __( 'Slide Type', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'image' => [
+                    'title' => __( 'Image', 'plugin-name' ),
+                    'icon' => 'fa fa-image',
+                ],
+                'text' => [
+                    'title' => __( 'Text', 'plugin-name' ),
+                    'icon' => 'fa fa-font',
+                ],
+            ],
+            'default' => 'image',
+            'toggle' => true,
+        ]
+    );
+
+    // Секція для зображення
     $repeater->add_control(
         'image',
         [
-            'label' => __( 'Image', 'plugin-name' ),
+            'label' => __( 'Choose Image', 'plugin-name' ),
             'type' => \Elementor\Controls_Manager::MEDIA,
             'default' => [
                 'url' => \Elementor\Utils::get_placeholder_image_src(),
             ],
-        ]
-    );
-
-    // Поле для висоти зображення
-    $repeater->add_control(
-        'image_height',
-        [
-            'label' => __( 'Image Height', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::TEXT,
-            'default' => '300px',
-            'description' => __( 'Set the height of the image (e.g., 300px, 100%, auto)', 'plugin-name' ),
-        ]
-    );
-
-    // Селектор для вибору позиції посилання
-    $repeater->add_control(
-        'link_position',
-        [
-            'label' => __( 'Link Position', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::SELECT,
-            'default' => 'bottom',
-            'options' => [
-                'top' => __( 'Top', 'plugin-name' ),
-                'bottom' => __( 'Bottom', 'plugin-name' ),
+            'condition' => [
+                'slide_type' => 'image',
             ],
         ]
     );
 
-    // Поле для URL посилання
+    // Секція для тексту
     $repeater->add_control(
-        'url',
+        'text_content',
         [
-            'label' => __( 'URL', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::URL,
-            'placeholder' => __( 'https://your-link.com', 'plugin-name' ),
-            'default' => [
-                'url' => '',
+            'label' => __( 'Slide Text', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::TEXTAREA,
+            'default' => __( 'Enter your text here', 'plugin-name' ),
+            'condition' => [
+                'slide_type' => 'text',
             ],
         ]
     );
 
-    // Поле для тексту посилання
-    $repeater->add_control(
-        'link_text',
+    // Поле для вибору типографії для тексту
+    $repeater->add_group_control(
+        \Elementor\Group_Control_Typography::get_type(),
         [
-            'label' => __( 'Link Text', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::TEXT,
-            'default' => __( 'Click here', 'plugin-name' ),
-            'placeholder' => __( 'Enter your text', 'plugin-name' ),
+            'name' => 'text_typography',
+            'label' => __( 'Typography', 'plugin-name' ),
+            'selector' => '{{WRAPPER}} .text-slide',
+            'condition' => [
+                'slide_type' => 'text',
+            ],
         ]
     );
 
-    // Додаємо репітер у віджет
+    // Поле для введення імені автора
+    $repeater->add_control(
+        'author_name',
+        [
+            'label' => __( 'Author Name', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::TEXT,
+            'default' => __( 'Author', 'plugin-name' ),
+            'condition' => [
+                'slide_type' => 'text',
+            ],
+        ]
+    );
+
+    // Додаємо репітер до контрола
     $this->add_control(
-        'repeater_items',
+        'slides',
         [
-            'label' => __( 'Repeater Items', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::REPEATER,
-            'fields' => $repeater->get_controls(),
-            'default' => [
-                [
-                    'link_position' => 'bottom',
-                    'link_text' => __( 'Click here', 'plugin-name' ),
-                    'image_height' => '300px',
-                ],
-            ],
-            'title_field' => '{{{ link_text }}}',
-        ]
-    );
-
-    // Закриваємо секцію
-    $this->end_controls_section();
-}
+            'label' => __( 'Slides', 'plugin-name' ),
+            'type' =>
