@@ -29,6 +29,18 @@ protected function _register_controls() {
         ]
     );
 
+    // Колір пікер для основного тексту
+    $this->add_control(
+        'main_text_color',
+        [
+            'label' => __( 'Main Text Color', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .main-text' => 'color: {{VALUE}};',
+            ],
+        ]
+    );
+
     // Поле для введення імені автора
     $this->add_control(
         'author_name',
@@ -47,6 +59,18 @@ protected function _register_controls() {
             'name' => 'author_name_typography',
             'label' => __( 'Author Name Typography', 'plugin-name' ),
             'selector' => '{{WRAPPER}} .author-name',
+        ]
+    );
+
+    // Колір пікер для імені автора
+    $this->add_control(
+        'author_name_color',
+        [
+            'label' => __( 'Author Name Color', 'plugin-name' ),
+            'type' => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .author-name' => 'color: {{VALUE}};',
+            ],
         ]
     );
 
