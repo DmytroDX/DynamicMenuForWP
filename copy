@@ -1,79 +1,51 @@
-protected function _register_controls() {
-    // Початок секції
-    $this->start_controls_section(
-        'content_section',
-        [
-            'label' => __( 'Content', 'plugin-name' ),
-            'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
-        ]
-    );
+class Custom_Widget extends \Elementor\Widget_Base {
 
-    // Поле для введення основного тексту
-    $this->add_control(
-        'main_text',
-        [
-            'label' => __( 'Main Text', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::TEXTAREA,
-            'default' => __( 'Your main text here', 'plugin-name' ),
-            'placeholder' => __( 'Enter the main text', 'plugin-name' ),
-        ]
-    );
+    public function get_name() {
+        return 'custom_widget';
+    }
 
-    // Група контролів типографії для основного тексту
-    $this->add_group_control(
-        \Elementor\Group_Control_Typography::get_type(),
-        [
-            'name' => 'main_text_typography',
-            'label' => __( 'Main Text Typography', 'plugin-name' ),
-            'selector' => '{{WRAPPER}} .main-text',
-        ]
-    );
+    public function get_title() {
+        return __( 'Custom Widget', 'text-domain' );
+    }
 
-    // Колір пікер для основного тексту
-    $this->add_control(
-        'main_text_color',
-        [
-            'label' => __( 'Main Text Color', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::COLOR,
-            'selectors' => [
-                '{{WRAPPER}} .main-text' => 'color: {{VALUE}};',
-            ],
-        ]
-    );
+    public function get_icon() {
+        return 'eicon-code';
+    }
 
-    // Поле для введення імені автора
-    $this->add_control(
-        'author_name',
-        [
-            'label' => __( 'Author Name', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::TEXT,
-            'default' => __( 'John Doe', 'plugin-name' ),
-            'placeholder' => __( 'Enter author name', 'plugin-name' ),
-        ]
-    );
+    public function get_categories() {
+        return [ 'general' ];
+    }
 
-    // Група контролів типографії для імені автора
-    $this->add_group_control(
-        \Elementor\Group_Control_Typography::get_type(),
-        [
-            'name' => 'author_name_typography',
-            'label' => __( 'Author Name Typography', 'plugin-name' ),
-            'selector' => '{{WRAPPER}} .author-name',
-        ]
-    );
+    protected function _register_controls() {
+        $this->start_controls_section(
+            'content_section',
+            [
+                'label' => __( 'Content', 'text-domain' ),
+                'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+            ]
+        );
 
-    // Колір пікер для імені автора
-    $this->add_control(
-        'author_name_color',
-        [
-            'label' => __( 'Author Name Color', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::COLOR,
-            'selectors' => [
-                '{{WRAPPER}} .author-name' => 'color: {{VALUE}};',
-            ],
-        ]
-    );
+        // Контроль для вставки віджетів
+        $this->add_control(
+            'inner_widgets',
+            [
+                'label' => __( 'Add Widgets', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::REPEATER,
+                'fields' => [],
+            ]
+        );
 
-    // Кінець секції
-    $this->end_controls_section();
+        $this->end_controls_section();
+    }
+
+    protected function render() {
+        // Тут ви можете викликати інші віджети або контент за допомогою функцій Elementor
+        echo '<div class="custom-widget">';
+
+        // Вставка внутрішніх віджетів
+        echo \Elementor\Plugin::$instance->frontend->get_builder_content_for_display($this->get_settings('inner_widgets'));
+
+        echo '</div>';
+    }
+
 }
