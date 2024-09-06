@@ -1,119 +1,55 @@
 protected function _register_controls() {
-
-    // Загальне поле для вибору типу слайдера
+    // Початок секції
     $this->start_controls_section(
-        'section_slider_type',
+        'content_section',
         [
-            'label' => __( 'Slider Type', 'plugin-name' ),
+            'label' => __( 'Content', 'plugin-name' ),
+            'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
         ]
     );
 
+    // Поле для введення основного тексту
     $this->add_control(
-        'slider_type',
+        'main_text',
         [
-            'label' => __( 'Select Slider Type', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::CHOOSE,
-            'options' => [
-                'image' => [
-                    'title' => __( 'Image Slider', 'plugin-name' ),
-                    'icon' => 'fa fa-image',
-                ],
-                'text' => [
-                    'title' => __( 'Text Slider', 'plugin-name' ),
-                    'icon' => 'fa fa-font',
-                ],
-            ],
-            'default' => 'image',
-            'toggle' => true,
-        ]
-    );
-
-    $this->end_controls_section();
-
-    // Підрозділ для налаштувань слайдів (репітер)
-    $this->start_controls_section(
-        'section_slides',
-        [
-            'label' => __( 'Slides', 'plugin-name' ),
-            'condition' => [
-                'slider_type' => ['image', 'text'], // Показувати, коли вибрано тип слайдера
-            ],
-        ]
-    );
-
-    // Створення репітера
-    $repeater = new \Elementor\Repeater();
-
-    // Поле для завантаження зображення, коли вибрано тип слайдера 'image'
-    $repeater->add_control(
-        'image_slide',
-        [
-            'label' => __( 'Choose Image', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::MEDIA,
-            'default' => [
-                'url' => \Elementor\Utils::get_placeholder_image_src(),
-            ],
-            'condition' => [
-                'slider_type' => 'image',
-            ],
-        ]
-    );
-
-    // Поле для тексту, коли вибрано тип слайдера 'text'
-    $repeater->add_control(
-        'text_slide',
-        [
-            'label' => __( 'Slide Text', 'plugin-name' ),
+            'label' => __( 'Main Text', 'plugin-name' ),
             'type' => \Elementor\Controls_Manager::TEXTAREA,
-            'default' => __( 'Your text here', 'plugin-name' ),
-            'placeholder' => __( 'Enter your text', 'plugin-name' ),
-            'condition' => [
-                'slider_type' => 'text',
-            ],
+            'default' => __( 'Your main text here', 'plugin-name' ),
+            'placeholder' => __( 'Enter the main text', 'plugin-name' ),
         ]
     );
 
-    // Типографія для тексту
-    $repeater->add_group_control(
+    // Група контролів типографії для основного тексту
+    $this->add_group_control(
         \Elementor\Group_Control_Typography::get_type(),
         [
-            'name' => 'text_typography',
-            'label' => __( 'Typography', 'plugin-name' ),
-            'selector' => '{{WRAPPER}} {{CURRENT_ITEM}} .slide-text',
-            'condition' => [
-                'slider_type' => 'text',
-            ],
+            'name' => 'main_text_typography',
+            'label' => __( 'Main Text Typography', 'plugin-name' ),
+            'selector' => '{{WRAPPER}} .main-text',
         ]
     );
 
-    // Поле для введення автора, коли вибрано тип слайдера 'text'
-    $repeater->add_control(
+    // Поле для введення імені автора
+    $this->add_control(
         'author_name',
         [
             'label' => __( 'Author Name', 'plugin-name' ),
             'type' => \Elementor\Controls_Manager::TEXT,
+            'default' => __( 'John Doe', 'plugin-name' ),
             'placeholder' => __( 'Enter author name', 'plugin-name' ),
-            'condition' => [
-                'slider_type' => 'text',
-            ],
         ]
     );
 
-    // Додавання репітера в головний віджет
-    $this->add_control(
-        'slides',
+    // Група контролів типографії для імені автора
+    $this->add_group_control(
+        \Elementor\Group_Control_Typography::get_type(),
         [
-            'label' => __( 'Slides', 'plugin-name' ),
-            'type' => \Elementor\Controls_Manager::REPEATER,
-            'fields' => $repeater->get_controls(),
-            'default' => [
-                [
-                    'slider_type' => 'image',
-                ],
-            ],
-            'title_field' => '{{{ slider_type === "image" ? "Image Slide" : "Text Slide" }}}',
+            'name' => 'author_name_typography',
+            'label' => __( 'Author Name Typography', 'plugin-name' ),
+            'selector' => '{{WRAPPER}} .author-name',
         ]
     );
 
+    // Кінець секції
     $this->end_controls_section();
 }
