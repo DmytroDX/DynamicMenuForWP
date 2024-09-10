@@ -1,60 +1,18 @@
-class My_Custom_Container_Widget extends \Elementor\Widget_Base {
+function my_custom_elementor_scripts() {
+    // Реєструємо скрипти
+    wp_register_script('my-custom-script', get_template_directory_uri() . '/js/custom-script.js', array('jquery'), null, true);
 
-    public function get_name() {
-        return 'my_custom_container_widget';
-    }
-
-    public function get_title() {
-        return 'My Custom Container Widget';
-    }
-
-    public function get_icon() {
-        return 'eicon-box';
-    }
-
-    public function get_categories() {
-        return [ 'general' ];
-    }
-
-    protected function _register_controls() {
-        $this->start_controls_section(
-            'content_section',
-            [
-                'label' => __('Content', 'plugin-name'),
-                'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
-            ]
-        );
-
-        // Контейнер для виводу HTML
-        $this->add_control(
-            'container_content',
-            [
-                'label' => __('Container Content', 'plugin-name'),
-                'type' => \Elementor\Controls_Manager::WYSIWYG,
-                'default' => __('Default content', 'plugin-name'),
-                'placeholder' => __('Type your content here', 'plugin-name'),
-            ]
-        );
-
-        $this->end_controls_section();
-    }
-
-    protected function render() {
-        $settings = $this->get_settings_for_display();
-
-        echo '<div class="custom-container">';
-        echo wp_kses_post($settings['container_content']);
-        echo '</div>';
-    }
-
-    protected function _content_template() {
-        ?>
-        <# 
-        var containerContent = settings.container_content;
-        #>
-        <div class="custom-container">
-            {{{ containerContent }}}
-        </div>
-        <?php
+    // Підключаємо скрипти на фронтенді
+    if ( ! Elementor\Plugin::instance()->editor->is_edit_mode() ) {
+        wp_enqueue_script('my-custom-script');
     }
 }
+
+add_action('wp_enqueue_scripts', 'my_custom_elementor_scripts');
+
+// Підключаємо скрипти в редакторі Elementor
+function my_custom_elementor_editor_scripts() {
+    wp_enqueue_script('my-custom-script');
+}
+
+add_action('elementor/editor/before_enqueue_scripts', 'my_custom_elementor_editor_scripts');
