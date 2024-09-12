@@ -1,18 +1,58 @@
-function my_custom_elementor_scripts() {
-    // Реєструємо скрипти
-    wp_register_script('my-custom-script', get_template_directory_uri() . '/js/custom-script.js', array('jquery'), null, true);
+protected function _register_controls() {
+    // Post Type Selector
+    $this->add_control(
+        'post_type',
+        [
+            'label' => __('Select Post Type', 'plugin-name'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                'alloy' => __('Alloys', 'plugin-name'),
+                'product' => __('Products', 'plugin-name'),
+                'packaging' => __('Packagings', 'plugin-name'),
+            ],
+            'default' => 'alloy',
+        ]
+    );
 
-    // Підключаємо скрипти на фронтенді
-    if ( ! Elementor\Plugin::instance()->editor->is_edit_mode() ) {
-        wp_enqueue_script('my-custom-script');
+    // Post selection (will be populated dynamically)
+    $this->add_control(
+        'selected_posts',
+        [
+            'label' => __('Select Posts', 'plugin-name'),
+            'type' => \Elementor\Controls_Manager::SELECT2,
+            'options' => [],
+            'multiple' => true,
+            'default' => [],
+        ]
+    );
+
+    // Row gap, colors, etc. will follow here
+}
+
+protected function render() {
+    // Your render logic
+}
+
+// AJAX handler to get posts dynamically based on post type
+public function get_dynamic_post_options() {
+    check_ajax_referer('elementor_ajax_nonce', '_nonce');
+
+    $post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : 'alloy';
+
+    $posts = get_posts([
+        'post_type' => $post_type,
+        'posts_per_page' => -1,
+    ]);
+
+    $options = [];
+    foreach ($posts as $post) {
+        $options[$post->ID] = $post->post_title;
     }
+
+    wp_send_json($options);
 }
 
-add_action('wp_enqueue_scripts', 'my_custom_elementor_scripts');
-
-// Підключаємо скрипти в редакторі Elementor
-function my_custom_elementor_editor_scripts() {
-    wp_enqueue_script('my-custom-script');
+// Enqueue the JavaScript file
+public function get_script_depends() {
+    return [ 'custom-widget-scripts' ];
 }
-
-add_action('elementor/editor/before_enqueue_scripts', 'my_custom_elementor_editor_scripts');
