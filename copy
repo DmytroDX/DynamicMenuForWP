@@ -1,8 +1,95 @@
-function my_custom_widget_scripts() {
-    wp_enqueue_script( 'my-custom-widget', get_template_directory_uri() . '/js/my-custom-widget.js', [ 'jquery' ], false, true );
+protected function _register_controls() {
+    // Додаємо опцію для вибору типу кольору (звичайний або градієнт)
+    $this->add_control(
+        'color_type',
+        [
+            'label' => __('Color Type', 'plugin-name'),
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'solid' => [
+                    'title' => __('Solid Color', 'plugin-name'),
+                    'icon' => 'fa fa-paint-brush',
+                ],
+                'gradient' => [
+                    'title' => __('Gradient', 'plugin-name'),
+                    'icon' => 'fa fa-adjust',
+                ],
+            ],
+            'default' => 'solid',
+            'toggle' => true,
+        ]
+    );
 
-    wp_localize_script( 'my-custom-widget', 'my_custom_widget', [
-        'nonce' => wp_create_nonce( 'my_custom_widget_nonce' ),
-    ]);
+    // Solid Color Control
+    $this->add_control(
+        'solid_color',
+        [
+            'label' => __('Solid Color', 'plugin-name'),
+            'type' => \Elementor\Controls_Manager::COLOR,
+            'default' => '#FFFFFF',
+            'selectors' => [
+                '{{WRAPPER}} .your-element-class' => 'background-color: {{VALUE}};',
+            ],
+            'condition' => [
+                'color_type' => 'solid',
+            ],
+        ]
+    );
+
+    // Gradient Controls
+    $this->add_control(
+        'gradient_color_1',
+        [
+            'label' => __('Gradient Color 1', 'plugin-name'),
+            'type' => \Elementor\Controls_Manager::COLOR,
+            'default' => '#6EC1E4',
+            'selectors' => [
+                '{{WRAPPER}} .your-element-class' => 'background-image: linear-gradient(to right, {{gradient_color_1.VALUE}}, {{gradient_color_2.VALUE}});',
+            ],
+            'condition' => [
+                'color_type' => 'gradient',
+            ],
+        ]
+    );
+
+    $this->add_control(
+        'gradient_color_2',
+        [
+            'label' => __('Gradient Color 2', 'plugin-name'),
+            'type' => \Elementor\Controls_Manager::COLOR,
+            'default' => '#000000',
+            'selectors' => [
+                '{{WRAPPER}} .your-element-class' => 'background-image: linear-gradient(to right, {{gradient_color_1.VALUE}}, {{VALUE}});',
+            ],
+            'condition' => [
+                'color_type' => 'gradient',
+            ],
+        ]
+    );
+
+    // Gradient Direction Control
+    $this->add_control(
+        'gradient_direction',
+        [
+            'label' => __('Gradient Direction', 'plugin-name'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                'to right' => __('Left to Right', 'plugin-name'),
+                'to left' => __('Right to Left', 'plugin-name'),
+                'to bottom' => __('Top to Bottom', 'plugin-name'),
+                'to top' => __('Bottom to Top', 'plugin-name'),
+            ],
+            'default' => 'to right',
+            'selectors' => [
+                '{{WRAPPER}} .your-element-class' => 'background-image: linear-gradient({{VALUE}}, {{gradient_color_1.VALUE}}, {{gradient_color_2.VALUE}});',
+            ],
+            'condition' => [
+                'color_type' => 'gradient',
+            ],
+        ]
+    );
 }
-add_action( 'wp_enqueue_scripts', 'my_custom_widget_scripts' );
+
+protected function render() {
+    // Логіка рендерингу контенту вашого віджета
+}
