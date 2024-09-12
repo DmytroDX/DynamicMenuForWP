@@ -1,95 +1,109 @@
-protected function _register_controls() {
-    // Додаємо опцію для вибору типу кольору (звичайний або градієнт)
-    $this->add_control(
-        'color_type',
-        [
-            'label' => __('Color Type', 'plugin-name'),
-            'type' => \Elementor\Controls_Manager::CHOOSE,
-            'options' => [
-                'solid' => [
-                    'title' => __('Solid Color', 'plugin-name'),
-                    'icon' => 'fa fa-paint-brush',
+class Custom_Tabs_Widget extends \Elementor\Widget_Base {
+
+    public function get_name() {
+        return 'custom_tabs';
+    }
+
+    public function get_title() {
+        return __( 'Custom Tabs', 'text-domain' );
+    }
+
+    public function get_icon() {
+        return 'eicon-tabs';
+    }
+
+    public function get_categories() {
+        return [ 'general' ];
+    }
+
+    protected function _register_controls() {
+        $this->start_controls_section(
+            'tabs_section',
+            [
+                'label' => __( 'Tabs', 'text-domain' ),
+                'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+            ]
+        );
+
+        $this->add_control(
+            'tab_image',
+            [
+                'label' => __( 'Tab Image', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::MEDIA,
+                'default' => [
+                    'url' => \Elementor\Utils::get_placeholder_image_src(),
                 ],
-                'gradient' => [
-                    'title' => __('Gradient', 'plugin-name'),
-                    'icon' => 'fa fa-adjust',
+            ]
+        );
+
+        $this->add_control(
+            'tab_hover_image',
+            [
+                'label' => __( 'Tab Hover Image', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::MEDIA,
+                'default' => [
+                    'url' => \Elementor\Utils::get_placeholder_image_src(),
                 ],
-            ],
-            'default' => 'solid',
-            'toggle' => true,
-        ]
-    );
+            ]
+        );
 
-    // Solid Color Control
-    $this->add_control(
-        'solid_color',
-        [
-            'label' => __('Solid Color', 'plugin-name'),
-            'type' => \Elementor\Controls_Manager::COLOR,
-            'default' => '#FFFFFF',
-            'selectors' => [
-                '{{WRAPPER}} .your-element-class' => 'background-color: {{VALUE}};',
-            ],
-            'condition' => [
-                'color_type' => 'solid',
-            ],
-        ]
-    );
+        $this->add_control(
+            'tab_background_color',
+            [
+                'label' => __( 'Tab Background Color', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'default' => '#ffffff',
+            ]
+        );
 
-    // Gradient Controls
-    $this->add_control(
-        'gradient_color_1',
-        [
-            'label' => __('Gradient Color 1', 'plugin-name'),
-            'type' => \Elementor\Controls_Manager::COLOR,
-            'default' => '#6EC1E4',
-            'selectors' => [
-                '{{WRAPPER}} .your-element-class' => 'background-image: linear-gradient(to right, {{gradient_color_1.VALUE}}, {{gradient_color_2.VALUE}});',
-            ],
-            'condition' => [
-                'color_type' => 'gradient',
-            ],
-        ]
-    );
+        $this->add_control(
+            'tab_hover_background_color',
+            [
+                'label' => __( 'Tab Hover Background Color', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'default' => '#eeeeee',
+            ]
+        );
 
-    $this->add_control(
-        'gradient_color_2',
-        [
-            'label' => __('Gradient Color 2', 'plugin-name'),
-            'type' => \Elementor\Controls_Manager::COLOR,
-            'default' => '#000000',
-            'selectors' => [
-                '{{WRAPPER}} .your-element-class' => 'background-image: linear-gradient(to right, {{gradient_color_1.VALUE}}, {{VALUE}});',
-            ],
-            'condition' => [
-                'color_type' => 'gradient',
-            ],
-        ]
-    );
+        $this->end_controls_section();
 
-    // Gradient Direction Control
-    $this->add_control(
-        'gradient_direction',
-        [
-            'label' => __('Gradient Direction', 'plugin-name'),
-            'type' => \Elementor\Controls_Manager::SELECT,
-            'options' => [
-                'to right' => __('Left to Right', 'plugin-name'),
-                'to left' => __('Right to Left', 'plugin-name'),
-                'to bottom' => __('Top to Bottom', 'plugin-name'),
-                'to top' => __('Bottom to Top', 'plugin-name'),
-            ],
-            'default' => 'to right',
-            'selectors' => [
-                '{{WRAPPER}} .your-element-class' => 'background-image: linear-gradient({{VALUE}}, {{gradient_color_1.VALUE}}, {{gradient_color_2.VALUE}});',
-            ],
-            'condition' => [
-                'color_type' => 'gradient',
-            ],
-        ]
-    );
-}
+        $this->start_controls_section(
+            'content_section',
+            [
+                'label' => __( 'Tab Content', 'text-domain' ),
+                'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+            ]
+        );
 
-protected function render() {
-    // Логіка рендерингу контенту вашого віджета
+        $this->add_control(
+            'content_image',
+            [
+                'label' => __( 'Content Image', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::MEDIA,
+                'default' => [
+                    'url' => \Elementor\Utils::get_placeholder_image_src(),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'content_text',
+            [
+                'label' => __( 'Content Text', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::WYSIWYG,
+                'default' => __( 'Content goes here', 'text-domain' ),
+            ]
+        );
+
+        $this->add_control(
+            'content_background_color',
+            [
+                'label' => __( 'Content Background Color', 'text-domain' ),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'default' => '#ffffff',
+            ]
+        );
+
+        $this->end_controls_section();
+    }
 }
