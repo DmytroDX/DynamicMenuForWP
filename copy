@@ -1,58 +1,28 @@
-protected function _register_controls() {
-    // Post Type Selector
-    $this->add_control(
-        'post_type',
-        [
-            'label' => __('Select Post Type', 'plugin-name'),
-            'type' => \Elementor\Controls_Manager::SELECT,
-            'options' => [
-                'alloy' => __('Alloys', 'plugin-name'),
-                'product' => __('Products', 'plugin-name'),
-                'packaging' => __('Packagings', 'plugin-name'),
-            ],
-            'default' => 'alloy',
-        ]
-    );
+jQuery(document).ready(function ($) {
+    // Listen for changes in the post_type select field
+    $(document).on('change', '[data-setting="post_type"]', function () {
+        var selectedPostType = $(this).val();
+        var $postSelect = $(this).closest('.elementor-control').siblings().find('[data-setting="selected_posts"]');
 
-    // Post selection (will be populated dynamically)
-    $this->add_control(
-        'selected_posts',
-        [
-            'label' => __('Select Posts', 'plugin-name'),
-            'type' => \Elementor\Controls_Manager::SELECT2,
-            'options' => [],
-            'multiple' => true,
-            'default' => [],
-        ]
-    );
+        // Make AJAX request to get posts based on selected post type
+        $.ajax({
+            url: elementor.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'get_dynamic_post_options',
+                post_type: selectedPostType,
+                _nonce: elementor.config.nonce,
+            },
+            success: function (response) {
+                // Clear existing options
+                $postSelect.empty();
 
-    // Row gap, colors, etc. will follow here
-}
-
-protected function render() {
-    // Your render logic
-}
-
-// AJAX handler to get posts dynamically based on post type
-public function get_dynamic_post_options() {
-    check_ajax_referer('elementor_ajax_nonce', '_nonce');
-
-    $post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : 'alloy';
-
-    $posts = get_posts([
-        'post_type' => $post_type,
-        'posts_per_page' => -1,
-    ]);
-
-    $options = [];
-    foreach ($posts as $post) {
-        $options[$post->ID] = $post->post_title;
-    }
-
-    wp_send_json($options);
-}
-
-// Enqueue the JavaScript file
-public function get_script_depends() {
-    return [ 'custom-widget-scripts' ];
-}
+                // Populate select2 with new posts
+                $.each(response, function (id, title) {
+                    var newOption = new Option(title, id, false, false);
+                    $postSelect.append(newOption).trigger('change');
+                });
+            },
+        });
+    });
+});
