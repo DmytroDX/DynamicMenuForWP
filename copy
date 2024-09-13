@@ -28,97 +28,37 @@ class Custom_Button_Widget extends \Elementor\Widget_Base {
             ]
         );
 
-        // Початковий колір градієнта
+        // Контролер для вирівнювання через justify-content
         $this->add_control(
-            'gradient_color_start',
+            'button_justify_content',
             [
-                'label' => __( 'Start Color', 'plugin-name' ),
-                'type' => Controls_Manager::COLOR,
-                'default' => '#ff0000',
-                'selectors' => [
-                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{VALUE}} {{gradient_location_start.VALUE}}%, {{gradient_color_end.VALUE}} {{gradient_location_end.VALUE}}%);',
-                ],
-            ]
-        );
-
-        // Кінцевий колір градієнта
-        $this->add_control(
-            'gradient_color_end',
-            [
-                'label' => __( 'End Color', 'plugin-name' ),
-                'type' => Controls_Manager::COLOR,
-                'default' => '#0000ff',
-                'selectors' => [
-                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{gradient_color_start.VALUE}} {{gradient_location_start.VALUE}}%, {{VALUE}} {{gradient_location_end.VALUE}}%);',
-                ],
-            ]
-        );
-
-        // Кут градієнта
-        $this->add_control(
-            'gradient_angle',
-            [
-                'label' => __( 'Gradient Angle', 'plugin-name' ),
-                'type' => Controls_Manager::SLIDER,
-                'size_units' => [ 'deg' ],
-                'range' => [
-                    'deg' => [
-                        'min' => 0,
-                        'max' => 360,
+                'label' => __( 'Justify Content', 'plugin-name' ),
+                'type' => Controls_Manager::CHOOSE,
+                'options' => [
+                    'flex-start' => [
+                        'title' => __( 'Start', 'plugin-name' ),
+                        'icon' => 'eicon-h-align-left',
+                    ],
+                    'center' => [
+                        'title' => __( 'Center', 'plugin-name' ),
+                        'icon' => 'eicon-h-align-center',
+                    ],
+                    'flex-end' => [
+                        'title' => __( 'End', 'plugin-name' ),
+                        'icon' => 'eicon-h-align-right',
+                    ],
+                    'space-between' => [
+                        'title' => __( 'Space Between', 'plugin-name' ),
+                        'icon' => 'eicon-h-align-space-between',
+                    ],
+                    'space-around' => [
+                        'title' => __( 'Space Around', 'plugin-name' ),
+                        'icon' => 'eicon-h-align-space-around',
                     ],
                 ],
-                'default' => [
-                    'unit' => 'deg',
-                    'size' => 90,
-                ],
+                'default' => 'center',
                 'selectors' => [
-                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{SIZE}}{{UNIT}}, {{gradient_color_start.VALUE}} {{gradient_location_start.VALUE}}%, {{gradient_color_end.VALUE}} {{gradient_location_end.VALUE}}%);',
-                ],
-            ]
-        );
-
-        // Позиція початкового кольору
-        $this->add_control(
-            'gradient_location_start',
-            [
-                'label' => __( 'Start Position (%)', 'plugin-name' ),
-                'type' => Controls_Manager::SLIDER,
-                'size_units' => [ '%' ],
-                'range' => [
-                    '%' => [
-                        'min' => 0,
-                        'max' => 100,
-                    ],
-                ],
-                'default' => [
-                    'unit' => '%',
-                    'size' => 0,
-                ],
-                'selectors' => [
-                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{gradient_color_start.VALUE}} {{SIZE}}{{UNIT}}, {{gradient_color_end.VALUE}} {{gradient_location_end.VALUE}}%);',
-                ],
-            ]
-        );
-
-        // Позиція кінцевого кольору
-        $this->add_control(
-            'gradient_location_end',
-            [
-                'label' => __( 'End Position (%)', 'plugin-name' ),
-                'type' => Controls_Manager::SLIDER,
-                'size_units' => [ '%' ],
-                'range' => [
-                    '%' => [
-                        'min' => 0,
-                        'max' => 100,
-                    ],
-                ],
-                'default' => [
-                    'unit' => '%',
-                    'size' => 100,
-                ],
-                'selectors' => [
-                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{gradient_color_start.VALUE}} {{gradient_location_start.VALUE}}%, {{gradient_color_end.VALUE}} {{SIZE}}{{UNIT}});',
+                    '{{WRAPPER}} .custom-button-wrapper' => 'justify-content: {{VALUE}};',
                 ],
             ]
         );
@@ -128,7 +68,7 @@ class Custom_Button_Widget extends \Elementor\Widget_Base {
 
     protected function render() {
         ?>
-        <div class="custom-button-wrapper">
+        <div class="custom-button-wrapper" style="display: flex;">
             <a href="#" class="custom-button">
                 <?php _e( 'Click Me', 'plugin-name' ); ?>
             </a>
@@ -138,11 +78,9 @@ class Custom_Button_Widget extends \Elementor\Widget_Base {
 
     protected function _content_template() {
         ?>
-        <div class="custom-button-wrapper">
+        <div class="custom-button-wrapper" style="display: flex;">
             <a href="#" class="custom-button">
                 {{ settings.button_text }}
             </a>
         </div>
-        <?php
-    }
-}
+        <?
