@@ -1,46 +1,148 @@
-protected function render() {
-    $settings = $this->get_settings_for_display();
+use \Elementor\Controls_Manager;
 
-    // Таб зображення
-    $tab_image = $settings['tab_image']['url'];
-    $tab_hover_image = $settings['tab_hover_image']['url'];
-    $tab_background_color = $settings['tab_background_color'];
-    $tab_hover_background_color = $settings['tab_hover_background_color'];
+class Custom_Button_Widget extends \Elementor\Widget_Base {
 
-    // Контент
-    $content_image = $settings['content_image']['url'];
-    $content_text = $settings['content_text'];
-    $content_background_color = $settings['content_background_color'];
+    public function get_name() {
+        return 'custom_button_widget';
+    }
 
-    ?>
+    public function get_title() {
+        return __( 'Custom Button Widget', 'plugin-name' );
+    }
 
-    <div class="tabs-container" style="display: flex;">
-        <ul class="tabs" style="list-style-type: none;">
-            <li class="tab-item" style="background-color: <?php echo esc_attr( $tab_background_color ); ?>;"
-                onmouseover="this.style.backgroundColor='<?php echo esc_attr( $tab_hover_background_color ); ?>';"
-                onmouseout="this.style.backgroundColor='<?php echo esc_attr( $tab_background_color ); ?>';">
-                <img src="<?php echo esc_url( $tab_image ); ?>" alt="Tab Image" class="tab-image">
-                <img src="<?php echo esc_url( $tab_hover_image ); ?>" alt="Tab Hover Image" class="tab-hover-image" style="display: none;">
-            </li>
-        </ul>
-        <div class="tab-content" style="background-color: <?php echo esc_attr( $content_background_color ); ?>;">
-            <?php if ( $content_image ) : ?>
-                <img src="<?php echo esc_url( $content_image ); ?>" alt="Content Image" class="content-image">
-            <?php endif; ?>
-            <div class="content-text">
-                <?php echo wp_kses_post( $content_text ); ?>
-            </div>
+    public function get_icon() {
+        return 'eicon-button';
+    }
+
+    public function get_categories() {
+        return [ 'general' ];
+    }
+
+    protected function _register_controls() {
+        // Додаємо секцію для кнопки
+        $this->start_controls_section(
+            'button_section',
+            [
+                'label' => __( 'Button Settings', 'plugin-name' ),
+                'tab' => Controls_Manager::TAB_STYLE,
+            ]
+        );
+
+        // Початковий колір градієнта
+        $this->add_control(
+            'gradient_color_start',
+            [
+                'label' => __( 'Start Color', 'plugin-name' ),
+                'type' => Controls_Manager::COLOR,
+                'default' => '#ff0000',
+                'selectors' => [
+                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{VALUE}} {{gradient_location_start.VALUE}}%, {{gradient_color_end.VALUE}} {{gradient_location_end.VALUE}}%);',
+                ],
+            ]
+        );
+
+        // Кінцевий колір градієнта
+        $this->add_control(
+            'gradient_color_end',
+            [
+                'label' => __( 'End Color', 'plugin-name' ),
+                'type' => Controls_Manager::COLOR,
+                'default' => '#0000ff',
+                'selectors' => [
+                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{gradient_color_start.VALUE}} {{gradient_location_start.VALUE}}%, {{VALUE}} {{gradient_location_end.VALUE}}%);',
+                ],
+            ]
+        );
+
+        // Кут градієнта
+        $this->add_control(
+            'gradient_angle',
+            [
+                'label' => __( 'Gradient Angle', 'plugin-name' ),
+                'type' => Controls_Manager::SLIDER,
+                'size_units' => [ 'deg' ],
+                'range' => [
+                    'deg' => [
+                        'min' => 0,
+                        'max' => 360,
+                    ],
+                ],
+                'default' => [
+                    'unit' => 'deg',
+                    'size' => 90,
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{SIZE}}{{UNIT}}, {{gradient_color_start.VALUE}} {{gradient_location_start.VALUE}}%, {{gradient_color_end.VALUE}} {{gradient_location_end.VALUE}}%);',
+                ],
+            ]
+        );
+
+        // Позиція початкового кольору
+        $this->add_control(
+            'gradient_location_start',
+            [
+                'label' => __( 'Start Position (%)', 'plugin-name' ),
+                'type' => Controls_Manager::SLIDER,
+                'size_units' => [ '%' ],
+                'range' => [
+                    '%' => [
+                        'min' => 0,
+                        'max' => 100,
+                    ],
+                ],
+                'default' => [
+                    'unit' => '%',
+                    'size' => 0,
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{gradient_color_start.VALUE}} {{SIZE}}{{UNIT}}, {{gradient_color_end.VALUE}} {{gradient_location_end.VALUE}}%);',
+                ],
+            ]
+        );
+
+        // Позиція кінцевого кольору
+        $this->add_control(
+            'gradient_location_end',
+            [
+                'label' => __( 'End Position (%)', 'plugin-name' ),
+                'type' => Controls_Manager::SLIDER,
+                'size_units' => [ '%' ],
+                'range' => [
+                    '%' => [
+                        'min' => 0,
+                        'max' => 100,
+                    ],
+                ],
+                'default' => [
+                    'unit' => '%',
+                    'size' => 100,
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .custom-button' => 'background-image: linear-gradient({{gradient_angle.VALUE}}deg, {{gradient_color_start.VALUE}} {{gradient_location_start.VALUE}}%, {{gradient_color_end.VALUE}} {{SIZE}}{{UNIT}});',
+                ],
+            ]
+        );
+
+        $this->end_controls_section();
+    }
+
+    protected function render() {
+        ?>
+        <div class="custom-button-wrapper">
+            <a href="#" class="custom-button">
+                <?php _e( 'Click Me', 'plugin-name' ); ?>
+            </a>
         </div>
-    </div>
+        <?php
+    }
 
-    <style>
-        .tab-item:hover .tab-image {
-            display: none;
-        }
-        .tab-item:hover .tab-hover-image {
-            display: block;
-        }
-    </style>
-
-    <?php
+    protected function _content_template() {
+        ?>
+        <div class="custom-button-wrapper">
+            <a href="#" class="custom-button">
+                {{ settings.button_text }}
+            </a>
+        </div>
+        <?php
+    }
 }
