@@ -1,24 +1,17 @@
-<?php
-$args = array(
-    'post_type' => array('type1', 'type2', 'type3'), // Ваші кастомні типи постів
-    'posts_per_page' => -1,
-);
-$query = new WP_Query($args);
+function load_styles_conditionally() {
+    // Стиль для всіх сторінок
+    wp_enqueue_style('common-style', get_template_directory_uri() . '/css/common.css');
 
-if ($query->have_posts()) : 
-    while ($query->have_posts()) : $query->the_post(); ?>
-        <div class="post-tile">
-            <a href="#post-<?php the_ID(); ?>" data-fancybox="gallery" data-src="#content-<?php the_ID(); ?>">
-                <h3><?php the_title(); ?></h3>
-            </a>
-        </div>
+    // Якщо використовується шаблон `template-one.php`
+    if (is_page_template('template-one.php')) {
+        wp_enqueue_style('first-style', get_template_directory_uri() . '/css/first-style.css', array('common-style'));
+        wp_enqueue_style('second-style', get_template_directory_uri() . '/css/second-style.css', array('first-style'));
+    }
+    // Якщо використовується шаблон `template-two.php`
+    elseif (is_page_template('template-two.php')) {
+        wp_enqueue_style('second-style', get_template_directory_uri() . '/css/second-style.css', array('common-style'));
+        wp_enqueue_style('first-style', get_template_directory_uri() . '/css/first-style.css', array('second-style'));
+    }
+}
 
-        <!-- Прихований контент для lightbox -->
-        <div id="content-<?php the_ID(); ?>" style="display: none;">
-            <h2><?php the_title(); ?></h2>
-            <div><?php the_content(); ?></div>
-        </div>
-    <?php endwhile;
-endif;
-wp_reset_postdata();
-?>
+add_action('wp_enqueue_scripts', 'load_styles_conditionally');
