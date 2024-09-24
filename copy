@@ -1,17 +1,91 @@
-function load_styles_conditionally() {
-    // Стиль для всіх сторінок
-    wp_enqueue_style('common-style', get_template_directory_uri() . '/css/common.css');
+// Переконайтесь, що скрипт виконується після завантаження редактора
+wp.domReady(function () {
+    const { registerPlugin } = wp.plugins;
+    const { InspectorControls } = wp.blockEditor;
+    const { PanelBody, RangeControl } = wp.components;
+    const { Fragment } = wp.element;
+    const { createHigherOrderComponent } = wp.compose;
+    const { addFilter } = wp.hooks;
 
-    // Якщо використовується шаблон `template-one.php`
-    if (is_page_template('template-one.php')) {
-        wp_enqueue_style('first-style', get_template_directory_uri() . '/css/first-style.css', array('common-style'));
-        wp_enqueue_style('second-style', get_template_directory_uri() . '/css/second-style.css', array('first-style'));
-    }
-    // Якщо використовується шаблон `template-two.php`
-    elseif (is_page_template('template-two.php')) {
-        wp_enqueue_style('second-style', get_template_directory_uri() . '/css/second-style.css', array('common-style'));
-        wp_enqueue_style('first-style', get_template_directory_uri() . '/css/first-style.css', array('second-style'));
-    }
-}
+    // Додаємо атрибут gap для Group блоку
+    function addGapAttribute(settings, name) {
+        if (name !== 'core/group') {
+            return settings;
+        }
 
-add_action('wp_enqueue_scripts', 'load_styles_conditionally');
+        // Додаємо новий атрибут для зберігання gap
+        settings.attributes = Object.assign(settings.attributes, {
+            gap: {
+                type: 'number',
+                default: 0,
+            },
+        });
+
+        return settings;
+    }
+
+    addFilter(
+        'blocks.registerBlockType',
+        'custom/group-gap/attribute',
+        addGapAttribute
+    );
+
+    // Додаємо елемент в інспектор контрол для введення gap
+    const addGapControl = createHigherOrderComponent((BlockEdit) => {
+        return (props) => {
+            if (props.name !== 'core/group') {
+                return <BlockEdit {...props} />;
+            }
+
+            const { gap } = props.attributes;
+            const { setAttributes } = props;
+
+            return (
+                <Fragment>
+                    <BlockEdit {...props} />
+                    <InspectorControls>
+                        <PanelBody title="Gap між елементами">
+                            <RangeControl
+                                label="Gap"
+                                value={gap}
+                                onChange={(value) => setAttributes({ gap: value })}
+                                min={0}
+                                max={100}
+                            />
+                        </PanelBody>
+                    </InspectorControls>
+                </Fragment>
+            );
+        };
+    }, 'withGapControl');
+
+    addFilter('editor.BlockEdit', 'custom/group-gap/control', addGapControl);
+
+    // Додаємо gap у стиль блоку
+    const applyGapStyle = createHigherOrderComponent((BlockListBlock) => {
+        return (props) => {
+            const { gap } = props.attributes;
+
+            if (props.name === 'core/group' && props.attributes.layout?.type === 'flex' && props.attributes.layout?.orientation === 'vertical') {
+                return (
+                    <div
+                        {...props}
+                        style={{ gap: `${gap}px` }}
+                    >
+                        <BlockListBlock {...props} />
+                    </div>
+                );
+            }
+
+            return <BlockListBlock {...props} />;
+        };
+    }, 'applyGapStyle');
+
+    addFilter('editor.BlockListBlock', 'custom/group-gap/style', applyGapStyle);
+});
+
+// Реєструємо плагін для редактора блоків
+registerPlugin('custom-group-gap', {
+    icon: 'editor-expand',
+    render: () => null,
+});
