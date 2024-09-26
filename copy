@@ -1,36 +1,14 @@
-// custom-gutenberg-format.js
-wp.richText.registerFormatType('custom/scroll-format', {
-    title: 'Scroll Format',
-    tagName: 'span',
-    className: null,  // Не використовуємо клас безпосередньо тут
-    attributes: {
-        class: 'class',  // Обробляємо класи вручну
-        'data-scroll': 'data-scroll',  // Атрибут data-scroll
-    },
-    edit({ isActive, value, onChange }) {
-        const onToggleFormat = () => {
-            onChange(
-                wp.richText.applyFormat(
-                    value,
-                    {
-                        type: 'custom/scroll-format',
-                        attributes: {
-                            class: 'class-one class-two',  // Додаємо класи тут
-                            'data-scroll': 'true',  // Додаємо значення для data-scroll
-                        }
-                    }
-                )
-            );
-        };
-
-        return wp.element.createElement(
-            wp.blockEditor.RichTextToolbarButton, 
-            {
-                icon: 'admin-site-alt3',  // Іконка для кнопки
-                title: 'Scroll Format',
-                onClick: onToggleFormat,
-                isActive
-            }
-        );
+// Додавання атрибутів і класів через фільтр
+wp.hooks.addFilter(
+    'blocks.getSaveContent.extraProps',
+    'custom/image-extra-attributes',
+    (extraProps, blockType, attributes) => {
+        if (blockType.name === 'core/image' && attributes.className && attributes.className.includes('is-style-custom-image-style')) {
+            // Додаємо додаткові класи
+            extraProps.className = extraProps.className + ' class-one class-two';
+            // Додаємо атрибут data-scroll
+            extraProps['data-scroll'] = 'true';
+        }
+        return extraProps;
     }
-});
+);
