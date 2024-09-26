@@ -1,25 +1,32 @@
 // custom-gutenberg-format.js
 wp.richText.registerFormatType('custom/scroll-format', {
     title: 'Scroll Format',
-    tagName: 'span',  // Можна використовувати будь-який HTML-тег
-    className: 'class-one class-two',  // Ваші два класи
+    tagName: 'span',
+    className: null,  // Не використовуємо клас безпосередньо тут
     attributes: {
-        'data-scroll': 'data-scroll',  // Додавання атрибуту data-scroll
+        class: 'class',  // Обробляємо класи вручну
+        'data-scroll': 'data-scroll',  // Атрибут data-scroll
     },
     edit({ isActive, value, onChange }) {
         const onToggleFormat = () => {
             onChange(
-                wp.richText.toggleFormat(
+                wp.richText.applyFormat(
                     value,
-                    { type: 'custom/scroll-format' }
+                    {
+                        type: 'custom/scroll-format',
+                        attributes: {
+                            class: 'class-one class-two',  // Додаємо класи тут
+                            'data-scroll': 'true',  // Додаємо значення для data-scroll
+                        }
+                    }
                 )
             );
         };
 
         return wp.element.createElement(
-            wp.editor.RichTextToolbarButton, 
+            wp.blockEditor.RichTextToolbarButton, 
             {
-                icon: 'admin-site-alt3',  // Виберіть іконку для кнопки
+                icon: 'admin-site-alt3',  // Іконка для кнопки
                 title: 'Scroll Format',
                 onClick: onToggleFormat,
                 isActive
