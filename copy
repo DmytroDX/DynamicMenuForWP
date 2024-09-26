@@ -1,30 +1,37 @@
 const { registerFormatType } = wp.richText;
 const { toggleFormat, getActiveFormat } = wp.richText;
 const { RichTextToolbarButton } = wp.blockEditor;
+const { createElement, Fragment } = wp.element;
 
 registerFormatType('my-plugin/custom-link-class', {
     title: 'Custom Link Class',
-    tagName: 'a', // Спрацьовує лише для <a>
-    className: 'custom-link',
+    tagName: 'a',
+    className: null, // Вказуємо, що клас можна змінювати
+    attributes: {
+        class: 'class',
+    },
     edit({ isActive, value, onChange }) {
         const activeFormat = getActiveFormat(value, 'my-plugin/custom-link-class');
+        const isActiveClass = activeFormat ? activeFormat.attributes.class === 'custom-link' : false;
 
         return (
-            <RichTextToolbarButton
-                icon="admin-links"
-                title="Custom Link Class"
-                onClick={() => {
-                    onChange(
-                        toggleFormat(value, {
-                            type: 'my-plugin/custom-link-class',
-                            attributes: {
-                                class: isActive ? null : 'custom-link', // Додаємо або видаляємо клас
-                            },
-                        })
-                    );
-                }}
-                isActive={isActive}
-            />
+            <Fragment>
+                <RichTextToolbarButton
+                    icon="admin-links"
+                    title="Add Custom Class to Link"
+                    onClick={() => {
+                        onChange(
+                            toggleFormat(value, {
+                                type: 'my-plugin/custom-link-class',
+                                attributes: {
+                                    class: isActiveClass ? null : 'custom-link', // Додаємо або видаляємо клас
+                                },
+                            })
+                        );
+                    }}
+                    isActive={isActiveClass}
+                />
+            </Fragment>
         );
     },
 });
