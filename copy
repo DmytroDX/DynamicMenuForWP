@@ -1,150 +1,27 @@
-<div class="process-flow">
-  <div class="step step-1">
-    <div class="number">1</div>
-    <div class="text">Deliver your goods or services</div>
-  </div>
-  <div class="step step-2">
-    <div class="number">2</div>
-    <div class="text">Send a copy of the invoice to us</div>
-  </div>
-  <div class="step step-3">
-    <div class="number">3</div>
-    <div class="text">We advance a percentage of the invoice amount within hours</div>
-  </div>
-  <div class="step step-4">
-    <div class="number">4</div>
-    <div class="text">We collect payment when it’s due</div>
-  </div>
-  <div class="step step-5">
-    <div class="number">5</div>
-    <div class="text">We send you the balance minus a small fee</div>
-  </div>
-  <div class="step step-6">
-    <div class="number">6</div>
-    <div class="text">Enjoy more time to focus on your business</div>
-  </div>
-</div>
+// custom-format.js
 
-*********************************************************************************************************************************************************************************************
-*********************************************************************************************************************************************************************************************
+const { registerFormatType } = wp.richText;
+const { toggleFormat } = wp.richText;
+const { RichTextToolbarButton } = wp.blockEditor;
 
-.process-flow {
-  display: flex;
-  flex-wrap: wrap;
-  width: 800px;
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    width: 100%;
-    height: 2px;
-    background-color: #00213C;
-  }
-  
-  .step {
-    display: flex;
-    flex-direction: column;
-    padding: 30px;
-    flex: 1 1 calc(33.33% - 62px);
-    row-gap: 15px;
-    position: relative;
-    border-bottom: 2px solid white;
-    
-    .number {
-      font-size: 30px;
-      color: white;
-      text-align: center;
-      font-weight: bold;
-    }
-    
-    .text {
-      font-size: 26px;
-      color: white;
-      text-align: center;
-    }
-  }
-  
-  .step:not(:nth-child(3n)) {
-    border-right: 2px solid white;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      left: 100%;
-      top: 10%;
-      border-top: 30px solid transparent;
-      border-bottom: 30px solid transparent;
-    }
-    &::before {
-      content: '';
-      position: absolute;
-      left: 100%;
-      top: 9%;
-      border-top: 32px solid transparent;
-      border-bottom: 32px solid transparent;
-      border-left: 32px solid white;
-    }
-  }
-  
-  .step-1 {
-    background-color: #00213C;
-    z-index: 6;
-    &::after {
-      border-left: 30px solid #00213C;
-    }
-  }
-  .step-2 {
-    background-color: #004260;
-    z-index: 5;
-    &::after {
-      border-left: 30px solid #004260;
-    }
-  }
-  .step-3 {
-    background-color: #175F7E;
-    z-index: 4;
-    &::after {
-      border-left: 30px solid #175F7E;
-    }
-  }
-  .step-4 {
-    background-color: #4A7E9E;
-     z-index: 3;
-    &::after {
-      border-left: 30px solid #4A7E9E;
-    }
-  }
-  .step-5 {
-    background-color: #809EB8;
-     z-index: 2;
-     &::after {
-       border-left: 30px solid #809EB8;
-    }
-  }
-  .step-6 {
-    background-color: #A2BACF;
-    z-index: 1;
-    &::after {
-      border-left: 30px solid #A2BACF;
-    }
-  }
-}
-
-************************************************************************************************************************************************************************
-************************************************************************************************************************************************************************
-
-function setHeight() {
-  let maxHeight = 0;
-  
-  $(".step").each(function(index, element) {
-    if ($(element).height() > maxHeight) {
-      maxHeight = $(element).height();
-    }
-  });
-  
-  $(".step").height(maxHeight);
-}
-
-setHeight();
+registerFormatType('my-plugin/custom-highlight', {
+    title: 'Highlight',
+    tagName: 'span',
+    className: 'custom-highlight',
+    edit({ isActive, value, onChange }) {
+        return (
+            <RichTextToolbarButton
+                icon="editor-textcolor"
+                title="Highlight"
+                onClick={() => {
+                    onChange(
+                        toggleFormat(value, {
+                            type: 'my-plugin/custom-highlight',
+                        })
+                    );
+                }}
+                isActive={isActive}
+            />
+        );
+    },
+});
