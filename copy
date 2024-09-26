@@ -1,37 +1,29 @@
-const { registerFormatType } = wp.richText;
-const { toggleFormat, getActiveFormat } = wp.richText;
-const { RichTextToolbarButton } = wp.blockEditor;
-const { createElement, Fragment } = wp.element;
-
-registerFormatType('my-plugin/custom-link-class', {
-    title: 'Custom Link Class',
-    tagName: 'a',
-    className: null, // Вказуємо, що клас можна змінювати
+// custom-gutenberg-format.js
+wp.richText.registerFormatType('custom/scroll-format', {
+    title: 'Scroll Format',
+    tagName: 'span',  // Можна використовувати будь-який HTML-тег
+    className: 'class-one class-two',  // Ваші два класи
     attributes: {
-        class: 'class',
+        'data-scroll': 'data-scroll',  // Додавання атрибуту data-scroll
     },
     edit({ isActive, value, onChange }) {
-        const activeFormat = getActiveFormat(value, 'my-plugin/custom-link-class');
-        const isActiveClass = activeFormat ? activeFormat.attributes.class === 'custom-link' : false;
+        const onToggleFormat = () => {
+            onChange(
+                wp.richText.toggleFormat(
+                    value,
+                    { type: 'custom/scroll-format' }
+                )
+            );
+        };
 
-        return (
-            <Fragment>
-                <RichTextToolbarButton
-                    icon="admin-links"
-                    title="Add Custom Class to Link"
-                    onClick={() => {
-                        onChange(
-                            toggleFormat(value, {
-                                type: 'my-plugin/custom-link-class',
-                                attributes: {
-                                    class: isActiveClass ? null : 'custom-link', // Додаємо або видаляємо клас
-                                },
-                            })
-                        );
-                    }}
-                    isActive={isActiveClass}
-                />
-            </Fragment>
+        return wp.element.createElement(
+            wp.editor.RichTextToolbarButton, 
+            {
+                icon: 'admin-site-alt3',  // Виберіть іконку для кнопки
+                title: 'Scroll Format',
+                onClick: onToggleFormat,
+                isActive
+            }
         );
-    },
+    }
 });
