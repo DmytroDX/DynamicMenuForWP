@@ -1,22 +1,25 @@
-// custom-format.js
-
 const { registerFormatType } = wp.richText;
-const { toggleFormat } = wp.richText;
+const { toggleFormat, getActiveFormat } = wp.richText;
 const { RichTextToolbarButton } = wp.blockEditor;
 
-registerFormatType('my-plugin/custom-highlight', {
-    title: 'Highlight',
-    tagName: 'span',
-    className: 'custom-highlight',
+registerFormatType('my-plugin/custom-link-class', {
+    title: 'Custom Link Class',
+    tagName: 'a', // Спрацьовує лише для <a>
+    className: 'custom-link',
     edit({ isActive, value, onChange }) {
+        const activeFormat = getActiveFormat(value, 'my-plugin/custom-link-class');
+
         return (
             <RichTextToolbarButton
-                icon="editor-textcolor"
-                title="Highlight"
+                icon="admin-links"
+                title="Custom Link Class"
                 onClick={() => {
                     onChange(
                         toggleFormat(value, {
-                            type: 'my-plugin/custom-highlight',
+                            type: 'my-plugin/custom-link-class',
+                            attributes: {
+                                class: isActive ? null : 'custom-link', // Додаємо або видаляємо клас
+                            },
                         })
                     );
                 }}
