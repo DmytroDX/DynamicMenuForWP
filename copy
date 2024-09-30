@@ -1,44 +1,56 @@
-// custom-gutenberg-format.js
-wp.richText.registerFormatType('custom/scroll-format', {
-    title: 'Scroll Format',
-    tagName: 'span',  // Використовуємо span, щоб залишатися всередині p
-    className: 'class-one',  // Додаємо тільки один клас через className
-    attributes: {
-        class: 'class',  // Використовуємо для модифікації класу вручну
-        'data-scroll': 'data-scroll',  // Атрибут data-scroll
-    },
-    edit({ isActive, value, onChange }) {
-        const onToggleFormat = () => {
-            if (isActive) {
-                // Видаляємо формат, якщо він активний
-                onChange(
-                    wp.richText.removeFormat(value, 'custom/scroll-format')
-                );
-            } else {
-                // Додаємо формат, якщо він не активний
-                onChange(
-                    wp.richText.applyFormat(
-                        value,
-                        {
-                            type: 'custom/scroll-format',
-                            attributes: {
-                                class: 'class-one class-two',  // Тут додаємо обидва класи
-                                'data-scroll': 'true',  // Додаємо атрибут data-scroll
-                            }
-                        }
-                    )
-                );
-            }
-        };
-
-        return wp.element.createElement(
-            wp.blockEditor.RichTextToolbarButton, 
-            {
-                icon: 'admin-site-alt3',  // Іконка для кнопки
-                title: 'Scroll Format',
-                onClick: onToggleFormat,
-                isActive
-            }
-        );
-    }
+wp.domReady(() => {
+    wp.blocks.registerBlockStyle('core/list', {
+        name: 'custom-color-bullets',
+        label: 'Custom Color Bullets',
+        isDefault: true,
+    });
 });
+
+wp.hooks.addFilter(
+    'editor.BlockEdit',
+    'custom/list-block-color-control',
+    addColorControl
+);
+
+function addColorControl(BlockEdit) {
+    return (props) => {
+        const { attributes, setAttributes, name } = props;
+
+        if (name !== 'core/list') {
+            return <BlockEdit {...props} />;
+        }
+
+        const { bulletColor } = attributes;
+
+        return (
+            <>
+                <BlockEdit {...props} />
+                <wp.blockEditor.InspectorControls>
+                    <wp.components.PanelBody title="Bullet Color Settings" initialOpen={true}>
+                        <wp.components.ColorPalette
+                            value={bulletColor}
+                            onChange={(color) => setAttributes({ bulletColor: color })}
+                        />
+                    </wp.components.PanelBody>
+                </wp.blockEditor.InspectorControls>
+            </>
+        );
+    };
+}
+
+wp.hooks.addFilter(
+    'blocks.getSaveContent.extraProps',
+    'custom/additional-list-bullet-color-props',
+    addCustomBulletColorProp
+);
+
+function addCustomBulletColorProp(extraProps, blockType, attributes) {
+    if (blockType.name === 'core/list' && attributes.bulletColor) {
+        extraProps.style = {
+            ...extraProps.style,
+            '--bullet-color': attributes.bulletColor,
+        };
+    }
+
+    return extraProps;
+}
