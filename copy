@@ -51,34 +51,36 @@ wp.hooks.addFilter(
     }
 );
 
-// Додаємо кастомний data-атрибут для bulletColor
+// Додаємо кастомний inline-стиль для bulletColor
 wp.hooks.addFilter(
     'blocks.getSaveContent.extraProps',
     'custom/list-item-bullet-color-props',
     (extraProps, blockType, attributes) => {
         if (blockType.name === 'core/list-item' && attributes.bulletColor) {
-            // Додаємо атрибут data-bullet-color з вибраним кольором
-            extraProps['data-bullet-color'] = attributes.bulletColor;
+            // Додаємо inline-стиль для псевдоелемента ::before через background-color
+            const style = `
+                ${extraProps.style || ''} 
+                --bullet-color: ${attributes.bulletColor};
+            `;
+            extraProps.style = style;
         }
         return extraProps;
     }
 );
 
-// Додаємо функцію для обробки кольору з атрибуту data-bullet-color
+// Додаємо функцію для встановлення кольору безпосередньо через background-color для псевдоелемента
 const applyBulletColor = () => {
-    // Отримуємо всі елементи списку з data-bullet-color
-    const listItems = document.querySelectorAll('[data-bullet-color]');
+    // Отримуємо всі елементи списку, які мають визначений стиль
+    const listItems = document.querySelectorAll('.wp-block-list-item');
 
     listItems.forEach((item) => {
-        const color = item.getAttribute('data-bullet-color');
-        if (color) {
-            // Додаємо inline-стиль для псевдоелемента ::before через CSS-перемінну
-            item.style.setProperty('--bullet-color', color);
-
+        const bulletColor = getComputedStyle(item).getPropertyValue('--bullet-color');
+        if (bulletColor) {
+            // Додаємо inline-стиль для псевдоелемента ::before
             const style = document.createElement('style');
             style.innerHTML = `
-                [data-bullet-color="${color}"]::before {
-                    color: ${color};
+                .wp-block-list-item::before {
+                    background-color: ${bulletColor};
                 }
             `;
             document.head.appendChild(style);
