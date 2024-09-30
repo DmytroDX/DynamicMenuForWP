@@ -1,12 +1,33 @@
-// Додаємо панель для вибору кольору в блок list-item
+// Функція для перевірки, чи блок має один із бажаних стилів
+const hasCustomListStyle = (block) => {
+    const { className } = block.attributes;
+    return (
+        className &&
+        (
+            className.includes('is-style-list-with-small-dots') ||
+            className.includes('is-style-list-body-style') ||
+            className.includes('is-style-bullet-list')
+        )
+    );
+};
+
+// Додаємо панель для вибору кольору, якщо батьківський блок core/list має потрібний стиль
 wp.hooks.addFilter(
     'editor.BlockEdit',
     'custom/list-item-color-control',
     (BlockEdit) => (props) => {
-        const { attributes, setAttributes, name } = props;
+        const { attributes, setAttributes, name, clientId } = props;
 
         // Перевіряємо, чи це core/list-item
         if (name !== 'core/list-item') {
+            return <BlockEdit {...props} />;
+        }
+
+        // Знаходимо батьківський блок core/list
+        const parentBlock = wp.data.select('core/block-editor').getBlock(wp.data.select('core/block-editor').getBlockParents(clientId)[0]);
+
+        // Якщо батьківський блок не має потрібного стилю, не показуємо вибір кольору
+        if (!parentBlock || !hasCustomListStyle(parentBlock)) {
             return <BlockEdit {...props} />;
         }
 
