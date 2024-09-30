@@ -1,33 +1,15 @@
-wp.domReady(() => {
-    // Регістрація існуючих стилів (якщо ще не зареєстровані)
-    wp.blocks.registerBlockStyle('core/list', {
-        name: 'list-with-small-dots',
-        label: 'List with Small Dots',
-    });
-
-    wp.blocks.registerBlockStyle('core/list', {
-        name: 'list-body-style',
-        label: 'List Body Style',
-    });
-
-    wp.blocks.registerBlockStyle('core/list', {
-        name: 'bullet-list',
-        label: 'Bullet List',
-    });
-});
-
+// Додаємо панель для вибору кольору
 wp.hooks.addFilter(
     'editor.BlockEdit',
     'custom/list-block-color-control',
-    addColorControl
-);
-
-function addColorControl(BlockEdit) {
-    return (props) => {
+    (BlockEdit) => (props) => {
         const { attributes, setAttributes, name, className } = props;
 
-        // Перевіряємо чи це блок core/list і чи має один з наших стилів
-        if (name !== 'core/list' || !['is-style-list-with-small-dots', 'is-style-list-body-style', 'is-style-bullet-list'].some(style => className.includes(style))) {
+        // Перевіряємо чи це блок 'core/list' і чи він має один з наших стилів
+        if (
+            name !== 'core/list' || 
+            !['is-style-list-with-small-dots', 'is-style-list-body-style', 'is-style-bullet-list'].some(style => className.includes(style))
+        ) {
             return <BlockEdit {...props} />;
         }
 
@@ -37,7 +19,7 @@ function addColorControl(BlockEdit) {
             <>
                 <BlockEdit {...props} />
                 <wp.blockEditor.InspectorControls>
-                    <wp.components.PanelBody title="Bullet Color Settings" initialOpen={true}>
+                    <wp.components.PanelBody title="Bullet Color" initialOpen={true}>
                         <wp.components.ColorPalette
                             value={bulletColor}
                             onChange={(color) => setAttributes({ bulletColor: color })}
@@ -46,22 +28,23 @@ function addColorControl(BlockEdit) {
                 </wp.blockEditor.InspectorControls>
             </>
         );
-    };
-}
+    }
+);
 
+// Додаємо кастомний стиль зі змінною --bullet-color
 wp.hooks.addFilter(
     'blocks.getSaveContent.extraProps',
     'custom/additional-list-bullet-color-props',
-    addCustomBulletColorProp
-);
-
-function addCustomBulletColorProp(extraProps, blockType, attributes) {
-    if (blockType.name === 'core/list' && attributes.bulletColor) {
-        extraProps.style = {
-            ...extraProps.style,
-            '--bullet-color': attributes.bulletColor,
-        };
+    (extraProps, blockType, attributes) => {
+        if (
+            blockType.name === 'core/list' &&
+            attributes.bulletColor
+        ) {
+            extraProps.style = {
+                ...extraProps.style,
+                '--bullet-color': attributes.bulletColor,
+            };
+        }
+        return extraProps;
     }
-
-    return extraProps;
-}
+);
