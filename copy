@@ -1,13 +1,14 @@
 // Функція для перевірки, чи блок має один із бажаних стилів
 const hasCustomListStyle = (block) => {
+    if (!block || !block.attributes || !block.attributes.className) {
+        return false;
+    }
+
     const { className } = block.attributes;
     return (
-        className &&
-        (
-            className.includes('is-style-list-with-small-dots') ||
-            className.includes('is-style-list-body-style') ||
-            className.includes('is-style-bullet-list')
-        )
+        className.includes('is-style-list-with-small-dots') ||
+        className.includes('is-style-list-body-style') ||
+        className.includes('is-style-bullet-list')
     );
 };
 
@@ -23,8 +24,9 @@ wp.hooks.addFilter(
             return <BlockEdit {...props} />;
         }
 
-        // Знаходимо батьківський блок core/list
-        const parentBlock = wp.data.select('core/block-editor').getBlock(wp.data.select('core/block-editor').getBlockParents(clientId)[0]);
+        // Отримуємо батьківський блок core/list
+        const parentBlocks = wp.data.select('core/block-editor').getBlockParents(clientId);
+        const parentBlock = parentBlocks.length ? wp.data.select('core/block-editor').getBlock(parentBlocks[0]) : null;
 
         // Якщо батьківський блок не має потрібного стилю, не показуємо вибір кольору
         if (!parentBlock || !hasCustomListStyle(parentBlock)) {
@@ -49,12 +51,13 @@ wp.hooks.addFilter(
     }
 );
 
-// Додаємо кастомний стиль зі змінною --bullet-color
+// Додаємо кастомний клас для bulletColor
 wp.hooks.addFilter(
     'blocks.getSaveContent.extraProps',
     'custom/list-item-bullet-color-props',
     (extraProps, blockType, attributes) => {
         if (blockType.name === 'core/list-item' && attributes.bulletColor) {
+            extraProps.className = `${extraProps.className} has-bullet-color`;
             extraProps.style = {
                 ...extraProps.style,
                 '--bullet-color': attributes.bulletColor,
