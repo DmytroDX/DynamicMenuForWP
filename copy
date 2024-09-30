@@ -57,11 +57,8 @@ wp.hooks.addFilter(
     'custom/list-item-bullet-color-props',
     (extraProps, blockType, attributes) => {
         if (blockType.name === 'core/list-item' && attributes.bulletColor) {
-            extraProps.className = `${extraProps.className} has-bullet-color`;
-            extraProps.style = {
-                ...extraProps.style,
-                '--bullet-color': attributes.bulletColor,
-            };
+            // Додаємо клас з кольором
+            extraProps.className = `${extraProps.className} bullet-color-${attributes.bulletColor.replace('#', '')}`;
         }
         return extraProps;
     }
