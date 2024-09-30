@@ -1,29 +1,41 @@
-// Додаємо панель для вибору кольору
+// Додаємо панель для вибору кольору для кожного елемента списку
 wp.hooks.addFilter(
     'editor.BlockEdit',
-    'custom/list-block-color-control',
+    'custom/list-item-color-control',
     (BlockEdit) => (props) => {
         const { attributes, setAttributes, name, className } = props;
 
-        // Перевіряємо чи це блок 'core/list' і чи він має один з наших стилів
-        if (
-            name !== 'core/list' || 
-            !['is-style-list-with-small-dots', 'is-style-list-body-style', 'is-style-bullet-list'].some(style => className.includes(style))
-        ) {
+        // Перевіряємо, чи це core/list і чи є елементами списку
+        if (name !== 'core/list') {
             return <BlockEdit {...props} />;
         }
 
-        const { bulletColor } = attributes;
+        // Додаємо колір для кожного елемента списку
+        const { bulletColors = [] } = attributes;
+
+        const updateBulletColor = (index, color) => {
+            const newBulletColors = [...bulletColors];
+            newBulletColors[index] = color;
+            setAttributes({ bulletColors: newBulletColors });
+        };
+
+        // Отримуємо кількість елементів списку (li) в блоці
+        const listItems = props.attributes.values ? props.attributes.values.split('\n') : [];
 
         return (
             <>
                 <BlockEdit {...props} />
                 <wp.blockEditor.InspectorControls>
-                    <wp.components.PanelBody title="Bullet Color" initialOpen={true}>
-                        <wp.components.ColorPalette
-                            value={bulletColor}
-                            onChange={(color) => setAttributes({ bulletColor: color })}
-                        />
+                    <wp.components.PanelBody title="Bullet Color for List Items" initialOpen={true}>
+                        {listItems.map((item, index) => (
+                            <div key={index}>
+                                <p>Color for item {index + 1}</p>
+                                <wp.components.ColorPalette
+                                    value={bulletColors[index]}
+                                    onChange={(color) => updateBulletColor(index, color)}
+                                />
+                            </div>
+                        ))}
                     </wp.components.PanelBody>
                 </wp.blockEditor.InspectorControls>
             </>
@@ -31,19 +43,26 @@ wp.hooks.addFilter(
     }
 );
 
-// Додаємо кастомний стиль зі змінною --bullet-color
+// Додаємо кастомний стиль зі змінною --bullet-color для кожного елемента списку
 wp.hooks.addFilter(
     'blocks.getSaveContent.extraProps',
-    'custom/additional-list-bullet-color-props',
+    'custom/list-item-bullet-color-props',
     (extraProps, blockType, attributes) => {
-        if (
-            blockType.name === 'core/list' &&
-            attributes.bulletColor
-        ) {
-            extraProps.style = {
-                ...extraProps.style,
-                '--bullet-color': attributes.bulletColor,
-            };
+        if (blockType.name === 'core/list') {
+            const { bulletColors = [] } = attributes;
+
+            // Додаємо стилі на кожен елемент списку (li)
+            extraProps.children = extraProps.children.map((child, index) => {
+                if (bulletColors[index]) {
+                    return React.cloneElement(child, {
+                        style: {
+                            ...child.props.style,
+                            '--bullet-color': bulletColors[index],
+                        },
+                    });
+                }
+                return child;
+            });
         }
         return extraProps;
     }
