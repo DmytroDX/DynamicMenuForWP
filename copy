@@ -1,8 +1,18 @@
 wp.domReady(() => {
+    // Регістрація існуючих стилів (якщо ще не зареєстровані)
     wp.blocks.registerBlockStyle('core/list', {
-        name: 'custom-color-bullets',
-        label: 'Custom Color Bullets',
-        isDefault: true,
+        name: 'list-with-small-dots',
+        label: 'List with Small Dots',
+    });
+
+    wp.blocks.registerBlockStyle('core/list', {
+        name: 'list-body-style',
+        label: 'List Body Style',
+    });
+
+    wp.blocks.registerBlockStyle('core/list', {
+        name: 'bullet-list',
+        label: 'Bullet List',
     });
 });
 
@@ -14,9 +24,10 @@ wp.hooks.addFilter(
 
 function addColorControl(BlockEdit) {
     return (props) => {
-        const { attributes, setAttributes, name } = props;
+        const { attributes, setAttributes, name, className } = props;
 
-        if (name !== 'core/list') {
+        // Перевіряємо чи це блок core/list і чи має один з наших стилів
+        if (name !== 'core/list' || !['is-style-list-with-small-dots', 'is-style-list-body-style', 'is-style-bullet-list'].some(style => className.includes(style))) {
             return <BlockEdit {...props} />;
         }
 
