@@ -51,15 +51,45 @@ wp.hooks.addFilter(
     }
 );
 
-// Додаємо кастомний клас для bulletColor
+// Додаємо кастомний data-атрибут для bulletColor
 wp.hooks.addFilter(
     'blocks.getSaveContent.extraProps',
     'custom/list-item-bullet-color-props',
     (extraProps, blockType, attributes) => {
         if (blockType.name === 'core/list-item' && attributes.bulletColor) {
-            // Додаємо клас з кольором
-            extraProps.className = `${extraProps.className} bullet-color-${attributes.bulletColor.replace('#', '')}`;
+            // Додаємо атрибут data-bullet-color з вибраним кольором
+            extraProps['data-bullet-color'] = attributes.bulletColor;
         }
         return extraProps;
     }
 );
+
+// Додаємо функцію для обробки кольору з атрибуту data-bullet-color
+const applyBulletColor = () => {
+    // Отримуємо всі елементи списку з data-bullet-color
+    const listItems = document.querySelectorAll('[data-bullet-color]');
+
+    listItems.forEach((item) => {
+        const color = item.getAttribute('data-bullet-color');
+        if (color) {
+            // Додаємо inline-стиль для псевдоелемента ::before через CSS-перемінну
+            item.style.setProperty('--bullet-color', color);
+
+            const style = document.createElement('style');
+            style.innerHTML = `
+                [data-bullet-color="${color}"]::before {
+                    color: ${color};
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    });
+};
+
+// Викликаємо applyBulletColor при завантаженні сторінки або після зміни блоків
+wp.domReady(() => {
+    applyBulletColor();
+    wp.data.subscribe(() => {
+        applyBulletColor();
+    });
+});
