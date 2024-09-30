@@ -42,7 +42,21 @@ wp.hooks.addFilter(
                     <wp.components.PanelBody title="Bullet Color" initialOpen={true}>
                         <wp.components.ColorPalette
                             value={bulletColor}
-                            onChange={(color) => setAttributes({ bulletColor: color })}
+                            onChange={(color) => {
+                                setAttributes({ bulletColor: color });
+
+                                // Додаємо/знімаємо клас для застосування кольору
+                                if (color) {
+                                    wp.data.dispatch('core/block-editor').updateBlockAttributes(clientId, {
+                                        className: `${attributes.className || ''} has-bullet-color`,
+                                    });
+                                } else {
+                                    // Видаляємо клас, якщо немає кольору
+                                    wp.data.dispatch('core/block-editor').updateBlockAttributes(clientId, {
+                                        className: (attributes.className || '').replace('has-bullet-color', '').trim(),
+                                    });
+                                }
+                            }}
                         />
                     </wp.components.PanelBody>
                 </wp.blockEditor.InspectorControls>
@@ -51,12 +65,15 @@ wp.hooks.addFilter(
     }
 );
 
-// Додаємо кастомний inline-стиль для bulletColor
+// Додаємо кастомний клас і стиль для bulletColor
 wp.hooks.addFilter(
     'blocks.getSaveContent.extraProps',
     'custom/list-item-bullet-color-props',
     (extraProps, blockType, attributes) => {
         if (blockType.name === 'core/list-item' && attributes.bulletColor) {
+            // Додаємо клас has-bullet-color
+            extraProps.className = `${extraProps.className || ''} has-bullet-color`;
+
             // Додаємо inline-стиль для псевдоелемента ::before через background-color
             const style = `
                 ${extraProps.style || ''} 
@@ -68,30 +85,24 @@ wp.hooks.addFilter(
     }
 );
 
-// Додаємо функцію для встановлення кольору безпосередньо через background-color для псевдоелемента
-const applyBulletColor = () => {
-    // Отримуємо всі елементи списку, які мають визначений стиль
-    const listItems = document.querySelectorAll('.wp-block-list-item');
-
-    listItems.forEach((item) => {
-        const bulletColor = getComputedStyle(item).getPropertyValue('--bullet-color');
-        if (bulletColor) {
-            // Додаємо inline-стиль для псевдоелемента ::before
-            const style = document.createElement('style');
-            style.innerHTML = `
-                .wp-block-list-item::before {
-                    background-color: ${bulletColor};
-                }
-            `;
-            document.head.appendChild(style);
+// Стилі для класу has-bullet-color
+const addBulletColorStyles = () => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .has-bullet-color::before {
+            content: '';
+            background-color: var(--bullet-color);
+            /* Додайте інші властивості для точок, як наприклад розмір, форма тощо */
+            width: 10px;
+            height: 10px;
+            display: inline-block;
+            border-radius: 50%;
         }
-    });
+    `;
+    document.head.appendChild(style);
 };
 
-// Викликаємо applyBulletColor при завантаженні сторінки або після зміни блоків
+// Викликаємо функцію додавання стилів при завантаженні сторінки
 wp.domReady(() => {
-    applyBulletColor();
-    wp.data.subscribe(() => {
-        applyBulletColor();
-    });
+    addBulletColorStyles();
 });
